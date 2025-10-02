@@ -16,7 +16,9 @@ export function PDFPreview({ reservation, onDownload, onBack }: PDFPreviewProps)
   const handleDownload = async () => {
     try {
       setIsGenerating(true);
+      console.log("Generando PDF con datos:", reservation);
       const pdfBlob = await generateReservationPDF(reservation);
+      console.log("PDF generado exitosamente, tamaño:", pdfBlob.size);
       
       const url = URL.createObjectURL(pdfBlob);
       const link = document.createElement("a");
@@ -27,10 +29,13 @@ export function PDFPreview({ reservation, onDownload, onBack }: PDFPreviewProps)
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
       
+      console.log("PDF descargado exitosamente");
       onDownload();
     } catch (error) {
       console.error("Error generando PDF:", error);
-      alert("Hubo un error al generar el PDF. Por favor intente nuevamente.");
+      console.error("Detalles del error:", error instanceof Error ? error.message : String(error));
+      console.error("Stack trace:", error instanceof Error ? error.stack : "No stack available");
+      alert(`Hubo un error al generar el PDF: ${error instanceof Error ? error.message : "Error desconocido"}. Por favor intente nuevamente.`);
     } finally {
       setIsGenerating(false);
     }

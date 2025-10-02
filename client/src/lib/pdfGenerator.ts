@@ -207,7 +207,11 @@ export class PDFGenerator {
         this.addHeader();
       }
 
-      this.doc.setFillColor(idx % 2 === 0 ? this.lightGray : 255, 255, 255);
+      if (idx % 2 === 0) {
+        this.doc.setFillColor(245, 245, 245);
+      } else {
+        this.doc.setFillColor(255, 255, 255);
+      }
       this.doc.rect(this.margin, this.currentY, this.pageWidth - 2 * this.margin, 12, "F");
 
       this.doc.setFontSize(9);
@@ -283,7 +287,7 @@ export class PDFGenerator {
       this.currentY += 5;
 
       if (destino.hotel) {
-        this.addHotelSection(destino.hotel);
+        await this.addHotelSection(destino.hotel);
       }
 
       if (destino.tours && destino.tours.length > 0) {
