@@ -5,6 +5,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2, Calendar, Users, Plane, Hotel, Map, FileText } from "lucide-react";
+import { DestinationEditor } from "./DestinationEditor";
+import { FlightEditor } from "./FlightEditor";
 import type { Reservation, Passenger, Destination, Flight, Tour, Transfer } from "@shared/schema";
 
 interface ReservationFormProps {
@@ -80,9 +82,68 @@ export function ReservationForm({ onSubmit }: ReservationFormProps) {
   };
 
   const removeDestination = (id: string) => {
+    const updatedDestinos = formData.destinos?.filter((d) => d.id !== id) || [];
+    const renumberedDestinos = updatedDestinos.map((d, idx) => ({ ...d, numero: idx + 1 }));
     setFormData({
       ...formData,
-      destinos: formData.destinos?.filter((d) => d.id !== id) || [],
+      destinos: renumberedDestinos,
+    });
+  };
+
+  const updateDestination = (id: string, field: keyof Destination, value: any) => {
+    setFormData({
+      ...formData,
+      destinos: formData.destinos?.map((d) =>
+        d.id === id ? { ...d, [field]: value } : d
+      ) || [],
+    });
+  };
+
+  const addTourToDestination = (destinoId: string) => {
+    const newTour: Tour = {
+      id: Date.now().toString(),
+      nombre: "",
+      incluye: [],
+      noIncluye: [],
+    };
+    setFormData({
+      ...formData,
+      destinos: formData.destinos?.map((d) =>
+        d.id === destinoId ? { ...d, tours: [...d.tours, newTour] } : d
+      ) || [],
+    });
+  };
+
+  const removeTourFromDestination = (destinoId: string, tourId: string) => {
+    setFormData({
+      ...formData,
+      destinos: formData.destinos?.map((d) =>
+        d.id === destinoId ? { ...d, tours: d.tours.filter((t) => t.id !== tourId) } : d
+      ) || [],
+    });
+  };
+
+  const addTransferToDestination = (destinoId: string) => {
+    const newTransfer: Transfer = {
+      id: Date.now().toString(),
+      tipo: "",
+      desde: "",
+      hasta: "",
+    };
+    setFormData({
+      ...formData,
+      destinos: formData.destinos?.map((d) =>
+        d.id === destinoId ? { ...d, traslados: [...d.traslados, newTransfer] } : d
+      ) || [],
+    });
+  };
+
+  const removeTransferFromDestination = (destinoId: string, transferId: string) => {
+    setFormData({
+      ...formData,
+      destinos: formData.destinos?.map((d) =>
+        d.id === destinoId ? { ...d, traslados: d.traslados.filter((t) => t.id !== transferId) } : d
+      ) || [],
     });
   };
 
@@ -108,6 +169,15 @@ export function ReservationForm({ onSubmit }: ReservationFormProps) {
     setFormData({
       ...formData,
       vuelos: formData.vuelos?.filter((f) => f.id !== id) || [],
+    });
+  };
+
+  const updateFlight = (id: string, field: keyof Flight, value: any) => {
+    setFormData({
+      ...formData,
+      vuelos: formData.vuelos?.map((f) =>
+        f.id === id ? { ...f, [field]: value } : f
+      ) || [],
     });
   };
 
@@ -309,97 +379,207 @@ export function ReservationForm({ onSubmit }: ReservationFormProps) {
 
       {/* Step 3: Destinations */}
       {step === 3 && (
-        <Card className="p-6">
-          <h2 className="text-2xl font-semibold mb-6">Destinos</h2>
-          <div className="space-y-4">
-            {formData.destinos?.map((destino) => (
-              <div key={destino.id} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">Destino {destino.numero}</h3>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => removeDestination(destino.id)}
-                    data-testid={`button-eliminar-destino-${destino.id}`}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-                <p className="text-sm text-muted-foreground" data-testid={`text-info-destino-${destino.id}`}>
-                  Configuración del destino {destino.numero}
-                </p>
+        <div className="space-y-6">
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-semibold">Destinos</h2>
+              <Button
+                variant="outline"
+                onClick={addDestination}
+                data-testid="button-agregar-destino"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Agregar Destino
+              </Button>
+            </div>
+          </Card>
+
+          {formData.destinos?.map((destino) => (
+            <div key={destino.id}>
+              <div className="flex items-center justify-between mb-2">
+                <div></div>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => removeDestination(destino.id)}
+                  data-testid={`button-eliminar-destino-${destino.id}`}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Eliminar Destino {destino.numero}
+                </Button>
               </div>
-            ))}
-          </div>
-          <Button
-            variant="outline"
-            onClick={addDestination}
-            className="mt-4"
-            data-testid="button-agregar-destino"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Agregar Destino
-          </Button>
-          <div className="flex justify-between mt-6">
-            <Button variant="outline" onClick={() => setStep(2)} data-testid="button-atras-step3">
-              Atrás
-            </Button>
-            <Button onClick={() => setStep(4)} data-testid="button-siguiente-step3">
-              Siguiente
-            </Button>
-          </div>
-        </Card>
+              <DestinationEditor
+                destination={destino}
+                onChange={(field, value) => updateDestination(destino.id, field, value)}
+                onAddTour={() => addTourToDestination(destino.id)}
+                onRemoveTour={(tourId) => removeTourFromDestination(destino.id, tourId)}
+                onAddTransfer={() => addTransferToDestination(destino.id)}
+                onRemoveTransfer={(transferId) => removeTransferFromDestination(destino.id, transferId)}
+              />
+            </div>
+          ))}
+
+          <Card className="p-6">
+            <div className="flex justify-between">
+              <Button variant="outline" onClick={() => setStep(2)} data-testid="button-atras-step3">
+                Atrás
+              </Button>
+              <Button onClick={() => setStep(4)} data-testid="button-siguiente-step3">
+                Siguiente
+              </Button>
+            </div>
+          </Card>
+        </div>
       )}
 
       {/* Step 4: Flights */}
       {step === 4 && (
-        <Card className="p-6">
-          <h2 className="text-2xl font-semibold mb-6">Vuelos</h2>
-          <div className="space-y-4">
-            {formData.vuelos?.map((vuelo) => (
-              <div key={vuelo.id} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">Vuelo - {vuelo.aerolinea || "Sin nombre"}</h3>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => removeFlight(vuelo.id)}
-                    data-testid={`button-eliminar-vuelo-${vuelo.id}`}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-                <p className="text-sm text-muted-foreground" data-testid={`text-info-vuelo-${vuelo.id}`}>
-                  Información del vuelo
-                </p>
+        <div className="space-y-6">
+          <Card className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-semibold">Vuelos</h2>
+              <Button
+                variant="outline"
+                onClick={addFlight}
+                data-testid="button-agregar-vuelo"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Agregar Vuelo
+              </Button>
+            </div>
+          </Card>
+
+          {formData.vuelos?.map((vuelo) => (
+            <div key={vuelo.id}>
+              <div className="flex items-center justify-between mb-2">
+                <div></div>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => removeFlight(vuelo.id)}
+                  data-testid={`button-eliminar-vuelo-${vuelo.id}`}
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Eliminar Vuelo
+                </Button>
               </div>
-            ))}
-          </div>
-          <Button
-            variant="outline"
-            onClick={addFlight}
-            className="mt-4"
-            data-testid="button-agregar-vuelo"
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Agregar Vuelo
-          </Button>
-          <div className="flex justify-between mt-6">
-            <Button variant="outline" onClick={() => setStep(3)} data-testid="button-atras-step4">
-              Atrás
-            </Button>
-            <Button onClick={() => setStep(5)} data-testid="button-siguiente-step4">
-              Siguiente
-            </Button>
-          </div>
-        </Card>
+              <FlightEditor
+                flight={vuelo}
+                onChange={(field: keyof Flight, value: any) => updateFlight(vuelo.id, field, value)}
+              />
+            </div>
+          ))}
+
+          <Card className="p-6">
+            <div className="flex justify-between">
+              <Button variant="outline" onClick={() => setStep(3)} data-testid="button-atras-step4">
+                Atrás
+              </Button>
+              <Button onClick={() => setStep(5)} data-testid="button-siguiente-step4">
+                Siguiente
+              </Button>
+            </div>
+          </Card>
+        </div>
       )}
 
       {/* Step 5: Final Details */}
       {step === 5 && (
         <Card className="p-6">
           <h2 className="text-2xl font-semibold mb-6">Detalles Finales</h2>
-          <div className="space-y-4">
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="p-4">
+                <h3 className="font-semibold mb-3 text-green-600">✓ El Paquete Incluye</h3>
+                <div className="space-y-2">
+                  {formData.incluye?.map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <Input
+                        value={item}
+                        onChange={(e) => {
+                          const newIncluye = [...(formData.incluye || [])];
+                          newIncluye[idx] = e.target.value;
+                          setFormData({ ...formData, incluye: newIncluye });
+                        }}
+                        placeholder="Elemento incluido"
+                        data-testid={`input-incluye-${idx}`}
+                      />
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => {
+                          const newIncluye = formData.incluye?.filter((_, i) => i !== idx) || [];
+                          setFormData({ ...formData, incluye: newIncluye });
+                        }}
+                        data-testid={`button-eliminar-incluye-${idx}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setFormData({
+                        ...formData,
+                        incluye: [...(formData.incluye || []), ""],
+                      });
+                    }}
+                    data-testid="button-agregar-incluye"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Agregar
+                  </Button>
+                </div>
+              </Card>
+
+              <Card className="p-4">
+                <h3 className="font-semibold mb-3 text-red-600">✗ El Paquete No Incluye</h3>
+                <div className="space-y-2">
+                  {formData.noIncluye?.map((item, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <Input
+                        value={item}
+                        onChange={(e) => {
+                          const newNoIncluye = [...(formData.noIncluye || [])];
+                          newNoIncluye[idx] = e.target.value;
+                          setFormData({ ...formData, noIncluye: newNoIncluye });
+                        }}
+                        placeholder="Elemento no incluido"
+                        data-testid={`input-no-incluye-${idx}`}
+                      />
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={() => {
+                          const newNoIncluye = formData.noIncluye?.filter((_, i) => i !== idx) || [];
+                          setFormData({ ...formData, noIncluye: newNoIncluye });
+                        }}
+                        data-testid={`button-eliminar-no-incluye-${idx}`}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      setFormData({
+                        ...formData,
+                        noIncluye: [...(formData.noIncluye || []), ""],
+                      });
+                    }}
+                    data-testid="button-agregar-no-incluye"
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Agregar
+                  </Button>
+                </div>
+              </Card>
+            </div>
+
             <div>
               <Label htmlFor="terminosUrl" data-testid="label-terminos-url">URL de Términos y Condiciones</Label>
               <Input
