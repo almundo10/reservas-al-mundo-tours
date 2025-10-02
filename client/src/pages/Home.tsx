@@ -13,8 +13,11 @@ export default function Home() {
   };
 
   const handleDownload = () => {
-    console.log("Descargando PDF...");
-    alert("La funcionalidad de descarga PDF se implementará en la siguiente fase");
+    console.log("PDF generado exitosamente");
+  };
+
+  const handleBack = () => {
+    setReservation(null);
   };
 
   return (
@@ -24,7 +27,7 @@ export default function Home() {
         {!reservation ? (
           <ReservationForm onSubmit={handleFormSubmit} />
         ) : (
-          <PDFPreview reservation={reservation} onDownload={handleDownload} />
+          <PDFPreview reservation={reservation} onDownload={handleDownload} onBack={handleBack} />
         )}
       </main>
     </div>

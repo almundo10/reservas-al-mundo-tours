@@ -1,26 +1,62 @@
-import { Download, Printer } from "lucide-react";
+import { useState } from "react";
+import { Download, Printer, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { generateReservationPDF } from "@/lib/pdfGenerator";
 import type { Reservation } from "@shared/schema";
 
 interface PDFPreviewProps {
   reservation: Reservation;
   onDownload: () => void;
+  onBack?: () => void;
 }
 
-export function PDFPreview({ reservation, onDownload }: PDFPreviewProps) {
+export function PDFPreview({ reservation, onDownload, onBack }: PDFPreviewProps) {
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const handleDownload = async () => {
+    try {
+      setIsGenerating(true);
+      const pdfBlob = await generateReservationPDF(reservation);
+      
+      const url = URL.createObjectURL(pdfBlob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `Reserva_${reservation.codigoReserva}_AL_Mundo_Tours.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      
+      onDownload();
+    } catch (error) {
+      console.error("Error generando PDF:", error);
+      alert("Hubo un error al generar el PDF. Por favor intente nuevamente.");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto">
       <div className="bg-card border rounded-lg p-6 mb-4">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-semibold">Vista Previa del Documento</h2>
+          <div className="flex items-center gap-4">
+            {onBack && (
+              <Button variant="ghost" size="sm" onClick={onBack} data-testid="button-volver">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Volver
+              </Button>
+            )}
+            <h2 className="text-2xl font-semibold">Vista Previa del Documento</h2>
+          </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm" data-testid="button-imprimir">
-              <Printer className="w-4 h-4 mr-2" />
-              Imprimir
-            </Button>
-            <Button onClick={onDownload} size="sm" data-testid="button-descargar">
+            <Button 
+              onClick={handleDownload} 
+              disabled={isGenerating}
+              data-testid="button-descargar"
+            >
               <Download className="w-4 h-4 mr-2" />
-              Descargar PDF
+              {isGenerating ? "Generando..." : "Descargar PDF"}
             </Button>
           </div>
         </div>
