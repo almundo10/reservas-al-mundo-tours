@@ -60,18 +60,28 @@ export class PDFGenerator {
       
       try {
         const bannerUrl = reservation.destinos[0].imagenBanner;
+        console.log('Banner URL exists:', !!bannerUrl, 'starts with http:', bannerUrl?.startsWith('http'), 'starts with data:', bannerUrl?.startsWith('data:image/'));
+        
         if (bannerUrl && (bannerUrl.startsWith('http') || bannerUrl.startsWith('data:image/'))) {
+          console.log('Processing banner image...');
           const { data, format } = await this.prepareImageForPDF(bannerUrl);
-          this.doc.addImage(data, format, this.margin, this.currentY, bannerWidth, bannerHeight);
+          console.log('Banner prepared, format:', format, 'data length:', data.length);
           
-          this.doc.setFillColor(0, 0, 0, 0.4);
+          this.doc.addImage(data, format, this.margin, this.currentY, bannerWidth, bannerHeight);
+          console.log('Banner image added to PDF successfully');
+          
+          (this.doc as any).saveGraphicsState();
+          (this.doc as any).setGState(new (this.doc as any).GState({ opacity: 0.4 }));
+          this.doc.setFillColor(0, 0, 0);
           this.doc.rect(this.margin, this.currentY, bannerWidth, bannerHeight, "F");
+          (this.doc as any).restoreGraphicsState();
         } else {
+          console.log('Banner URL invalid, using fallback rectangle');
           this.doc.setFillColor(this.primaryColor);
           this.doc.rect(this.margin, this.currentY, bannerWidth, bannerHeight, "F");
         }
       } catch (error) {
-        console.warn("Could not load banner image, using fallback", error);
+        console.error("Error loading banner image:", error);
         this.doc.setFillColor(this.primaryColor);
         this.doc.rect(this.margin, this.currentY, bannerWidth, bannerHeight, "F");
       }
@@ -829,9 +839,12 @@ export class PDFGenerator {
     }
     
     const format = this.getImageFormat(imgData);
+    console.log('Detected image format:', format, 'for URL starting with:', imageUrl.substring(0, 50));
     
     if (format === 'WEBP') {
+      console.log('Converting WEBP to JPEG...');
       imgData = await this.convertWebPToJPEG(imgData);
+      console.log('WEBP converted successfully to JPEG');
       return { data: imgData, format: 'JPEG' };
     }
     
