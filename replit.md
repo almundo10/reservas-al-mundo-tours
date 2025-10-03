@@ -8,11 +8,20 @@ The application features a multi-step form interface for data entry and generate
 
 ## Recent Changes (October 2025)
 
+### Agency Configuration System (NEW)
+- **Schema**: Added `AgencyConfig` type with fields: nombre, direccion, ciudad, email, telefono, logoUrl
+- **Storage**: Configuration persisted in localStorage with key "almundo_agency_config"
+- **UI**: New `/config` route with editable form for agency settings
+- **Header Integration**: Dynamic header displays agency name and city from configuration
+- **PDF Integration**: Agency information (name, address, contact) dynamically inserted in PDF header, footer, and legal text
+- **Default Values**: Pre-configured with AL Mundo Tours information, fully customizable per agency
+
 ### Schema Updates
 - **Hotel fields added**: `telefono`, `direccion`, `numeroReserva`
 - **Tour fields added**: `operador` (tour operator name)
 - **Reservation fields added**: `fechaPlazoPago` (payment deadline date)
 - **Responsible person contact**: `telefonoResponsable`
+- **Agency configuration**: Complete AgencyConfig schema for white-label customization
 
 ### Form Enhancements
 - Custom destination input with toggle between predefined list and manual entry
@@ -32,6 +41,7 @@ The application features a multi-step form interface for data entry and generate
 - Consecutive page numbering on all pages
 - Minimum 9pt font size for improved readability
 - Two-color scheme: Blue (#242553) and Orange (#F07E1A) only
+- **Dynamic agency info**: PDF header, footer, and legal text use configured agency data
 
 ## User Preferences
 
@@ -53,7 +63,7 @@ Preferred communication style: Simple, everyday language.
 
 **State Management**: Component-level state with React hooks. Form data is managed locally until submission, then passed to the PDF generation system.
 
-**Routing**: Wouter for lightweight client-side routing. Simple two-page structure (Home and 404).
+**Routing**: Wouter for lightweight client-side routing. Three main routes: Home (/), Agency Configuration (/config), and 404.
 
 **Design System**: 
 - Corporate brand colors: Primary blue (#242553) and Orange (#F07E1A) only (purple and cyan removed per user request)

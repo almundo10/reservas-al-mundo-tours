@@ -11,7 +11,7 @@ export function Header() {
       <div className="container mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
           <Link href="/">
-            <a className="flex items-center gap-3 hover-elevate rounded-lg p-2 -m-2">
+            <div className="flex items-center gap-3 hover-elevate rounded-lg p-2 -m-2 cursor-pointer">
               <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
                 <FileText className="w-6 h-6 text-primary-foreground" />
               </div>
@@ -21,7 +21,7 @@ export function Header() {
                   Generador de Documentos de Reserva
                 </p>
               </div>
-            </a>
+            </div>
           </Link>
           <div className="flex items-center gap-4">
             <div className="text-right">
