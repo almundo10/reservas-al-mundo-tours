@@ -33,6 +33,7 @@ export type Flight = z.infer<typeof flightSchema>;
 export const tourSchema = z.object({
   id: z.string(),
   nombre: z.string().min(1, "Nombre del tour requerido"),
+  operador: z.string().optional(),
   descripcion: z.string().optional(),
   duracion: z.string().optional(),
   incluye: z.array(z.string()).default([]),
@@ -62,6 +63,7 @@ export const hotelSchema = z.object({
   nombre: z.string().min(1, "Nombre del hotel requerido"),
   direccion: z.string().optional(),
   telefono: z.string().optional(),
+  numeroReserva: z.string().optional(),
   checkIn: z.string().optional(),
   checkOut: z.string().optional(),
   horaCheckIn: z.string().optional(),
@@ -129,6 +131,7 @@ export const reservationSchema = z.object({
   precioTotal: z.string().optional(),
   abono: z.string().optional(),
   saldoPendiente: z.string().optional(),
+  fechaPlazoPago: z.string().optional(),
   
   // Additional notes
   notasGenerales: z.string().optional(),
