@@ -25,10 +25,10 @@ Preferred communication style: Simple, everyday language.
 **Routing**: Wouter for lightweight client-side routing. Simple two-page structure (Home and 404).
 
 **Design System**: 
-- Primary brand colors: AL Mundo Tours blue (#0a6aa1) and accent gold (#f0a500)
-- Typography: Poppins font family from Google Fonts
+- Corporate brand colors: Primary blue (#242553), Orange (#F07E1A), Purple (#74388D), Cyan (#50BFD6)
+- Typography: Poppins font family from Google Fonts (interface and PDF)
 - Dark mode interface with utility-focused design
-- Professional light-themed PDF output
+- Professional light-themed PDF output with company logo in footer
 
 ### Backend Architecture
 
@@ -52,7 +52,12 @@ Preferred communication style: Simple, everyday language.
 
 ### External Dependencies
 
-**PDF Generation**: jsPDF library for client-side PDF creation. Generates multi-page documents with images, tables, and custom styling to match AL Mundo Tours branding.
+**PDF Generation**: jsPDF library for client-side PDF creation. Generates multi-page documents with images, tables, and custom styling to match AL Mundo Tours branding. Features include:
+- Company logo in footer (left) on all pages
+- Consecutive page numbering (right) on all pages  
+- Clickable links for terms and conditions
+- Minimum 9pt font size for all content (improved readability)
+- Corporate color scheme throughout (#242553, #F07E1A, #74388D, #50BFD6)
 
 **Form Validation**: Zod schema validation integrated with React Hook Form resolvers. Comprehensive schemas defined for Passenger, Flight, Tour, Transfer, Hotel, and Destination entities.
 

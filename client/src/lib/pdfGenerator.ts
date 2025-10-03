@@ -34,8 +34,6 @@ export class PDFGenerator {
     }
 
     await this.addCoverPage(reservation);
-    this.currentPageNumber = 1;
-    this.addFooter();
     
     await this.addItinerary(reservation);
     await this.addFlightsPage(reservation);
@@ -47,6 +45,7 @@ export class PDFGenerator {
 
   private async addCoverPage(reservation: Reservation) {
     this.currentY = 20;
+    this.currentPageNumber = 1;
 
     this.addHeader();
 
@@ -106,7 +105,7 @@ export class PDFGenerator {
     this.currentY += 20;
     this.addPassengerList(reservation);
 
-    this.addFooter(1);
+    this.addFooter();
   }
 
   private addHeader() {
@@ -118,7 +117,7 @@ export class PDFGenerator {
     this.doc.setFont("helvetica", "bold");
     this.doc.text("AL Mundo Tours", this.margin, 10);
     
-    this.doc.setFontSize(8);
+    this.doc.setFontSize(9);
     this.doc.setFont("helvetica", "normal");
     this.doc.text("Tu viaje comienza aquí", this.pageWidth - this.margin, 10, { align: "right" });
   }
@@ -151,7 +150,7 @@ export class PDFGenerator {
 
     this.doc.setFont("helvetica", "normal");
     this.doc.text(reservation.nombreCliente, midPoint, this.currentY + 14);
-    this.doc.setFontSize(8);
+    this.doc.setFontSize(9);
     this.doc.setTextColor(120, 120, 120);
     this.doc.text(`Doc: ${reservation.documentoCliente}`, midPoint, this.currentY + 20);
 
@@ -192,7 +191,7 @@ export class PDFGenerator {
         align: "center",
       });
 
-      this.doc.setFontSize(8);
+      this.doc.setFontSize(9);
       this.doc.setFont("helvetica", "normal");
       this.doc.setTextColor(this.textColor);
       this.doc.text(item.label, x + itemWidth / 2 - 2.5, this.currentY + 16, { align: "center" });
@@ -307,8 +306,6 @@ export class PDFGenerator {
 
       this.currentY += 10;
     }
-
-    this.addFooter(2);
   }
 
   private async addHotelSection(hotel: any) {
@@ -406,14 +403,14 @@ export class PDFGenerator {
 
       if (tour.descripcion) {
         this.doc.setFont("helvetica", "normal");
-        this.doc.setFontSize(8);
+        this.doc.setFontSize(9);
         const lines = this.doc.splitTextToSize(tour.descripcion, this.pageWidth - 2 * this.margin - 20);
         this.doc.text(lines, this.margin + 12, this.currentY);
         this.currentY += lines.length * 4;
       }
 
       if (tour.duracion || tour.horaInicio) {
-        this.doc.setFontSize(8);
+        this.doc.setFontSize(9);
         this.doc.setTextColor(120, 120, 120);
         const tourInfo = [];
         if (tour.duracion) tourInfo.push(`Duración: ${tour.duracion}`);
@@ -452,7 +449,7 @@ export class PDFGenerator {
 
       if (transfer.horaRecogida) {
         this.currentY += 4;
-        this.doc.setFontSize(8);
+        this.doc.setFontSize(9);
         this.doc.setTextColor(120, 120, 120);
         this.doc.text(`Recogida: ${transfer.horaRecogida}`, this.margin + 12, this.currentY);
       }
@@ -540,7 +537,7 @@ export class PDFGenerator {
       if (vuelo.equipajeFacturado) flightInfo.push(`Equipaje: ${vuelo.equipajeFacturado}`);
 
       if (flightInfo.length > 0) {
-        this.doc.setFontSize(8);
+        this.doc.setFontSize(9);
         this.doc.setTextColor(120, 120, 120);
         this.doc.text(flightInfo.join(" | "), this.margin + 5, this.currentY);
       }
@@ -793,7 +790,7 @@ export class PDFGenerator {
     }
 
     // Company info in center
-    this.doc.setFontSize(8);
+    this.doc.setFontSize(9);
     this.doc.setTextColor(100, 100, 100);
     this.doc.setFont("helvetica", "normal");
     this.doc.text("Calle 38 No 21-31, Tuluá – Colombia", this.pageWidth / 2, footerY + 2, { align: "center" });
