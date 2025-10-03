@@ -165,3 +165,21 @@ export const agencyConfigSchema = z.object({
 });
 
 export type AgencyConfig = z.infer<typeof agencyConfigSchema>;
+
+// Saved reservation types (for storing complete reservations in localStorage)
+export const savedReservationSchema = z.object({
+  id: z.string(),
+  nombreReserva: z.string().optional(), // Optional friendly name for the saved reservation
+  fechaGuardado: z.string().datetime(),
+  fechaUltimaModificacion: z.string().datetime(),
+  reserva: reservationSchema,
+});
+
+export type SavedReservation = z.infer<typeof savedReservationSchema>;
+
+export const insertSavedReservationSchema = savedReservationSchema.omit({ 
+  id: true, 
+  fechaGuardado: true,
+  fechaUltimaModificacion: true,
+});
+export type InsertSavedReservation = z.infer<typeof insertSavedReservationSchema>;
