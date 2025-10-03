@@ -57,8 +57,11 @@ export class PDFGenerator {
       
       try {
         const bannerUrl = reservation.destinos[0].imagenBanner;
-        if (bannerUrl && bannerUrl.startsWith('http')) {
-          const imgData = await this.loadImageAsDataURL(bannerUrl);
+        if (bannerUrl && (bannerUrl.startsWith('http') || bannerUrl.startsWith('data:image/'))) {
+          let imgData = bannerUrl;
+          if (bannerUrl.startsWith('http')) {
+            imgData = await this.loadImageAsDataURL(bannerUrl);
+          }
           this.doc.addImage(imgData, 'JPEG', this.margin, this.currentY, bannerWidth, bannerHeight);
           
           this.doc.setFillColor(0, 0, 0, 0.4);
@@ -335,7 +338,7 @@ export class PDFGenerator {
     this.doc.setTextColor(this.orangeColor);
     this.doc.setFontSize(11);
     this.doc.setFont("helvetica", "bold");
-    this.doc.text(`🏨 ${hotel.nombre}`, this.margin + 10, this.currentY + 5);
+    this.doc.text(hotel.nombre, this.margin + 10, this.currentY + 5);
 
     this.currentY += 12;
 
@@ -399,8 +402,11 @@ export class PDFGenerator {
 
         try {
           const photoUrl = hotel.fotos[i];
-          if (photoUrl && photoUrl.startsWith('http')) {
-            const imgData = await this.loadImageAsDataURL(photoUrl);
+          if (photoUrl && (photoUrl.startsWith('http') || photoUrl.startsWith('data:image/'))) {
+            let imgData = photoUrl;
+            if (photoUrl.startsWith('http')) {
+              imgData = await this.loadImageAsDataURL(photoUrl);
+            }
             this.doc.addImage(imgData, 'JPEG', xPos, yPos, photoWidth, photoHeight);
           } else {
             this.doc.setFillColor(220, 220, 220);
@@ -482,7 +488,7 @@ export class PDFGenerator {
       this.doc.setFont("helvetica", "normal");
       this.doc.setTextColor(this.textColor);
       this.doc.text(
-        `🚗 ${transfer.tipo}: ${transfer.desde} → ${transfer.hasta}`,
+        `${transfer.tipo}: ${transfer.desde} → ${transfer.hasta}`,
         this.margin + 10,
         this.currentY
       );
@@ -526,8 +532,11 @@ export class PDFGenerator {
       if (vuelo.logoAerolinea) {
         try {
           const logoUrl = vuelo.logoAerolinea;
-          if (logoUrl && logoUrl.startsWith('http')) {
-            const imgData = await this.loadImageAsDataURL(logoUrl);
+          if (logoUrl && (logoUrl.startsWith('http') || logoUrl.startsWith('data:image/'))) {
+            let imgData = logoUrl;
+            if (logoUrl.startsWith('http')) {
+              imgData = await this.loadImageAsDataURL(logoUrl);
+            }
             this.doc.addImage(imgData, 'PNG', this.pageWidth - this.margin - 25, this.currentY + 5, 20, 10);
           }
         } catch (error) {
@@ -538,7 +547,7 @@ export class PDFGenerator {
       this.doc.setFontSize(11);
       this.doc.setFont("helvetica", "bold");
       this.doc.setTextColor(this.primaryColor);
-      this.doc.text(`✈ ${vuelo.aerolinea}`, this.margin + 5, this.currentY + 7);
+      this.doc.text(vuelo.aerolinea, this.margin + 5, this.currentY + 7);
 
       this.doc.setFontSize(9);
       this.doc.setFont("helvetica", "normal");
