@@ -10,10 +10,12 @@ export default function Home() {
   const [reservation, setReservation] = useState<Reservation | null>(null);
   const [initialReservation, setInitialReservation] = useState<Reservation | null>(null);
   const [savedReservationId, setSavedReservationId] = useState<string | null>(null);
-  const { getReservationById } = useSavedReservations();
+  const { getReservationById, loaded } = useSavedReservations();
   const [location, setLocation] = useLocation();
 
   useEffect(() => {
+    if (!loaded) return;
+    
     const params = new URLSearchParams(window.location.search);
     const loadId = params.get("load");
     
@@ -26,7 +28,7 @@ export default function Home() {
       }
       setLocation("/");
     }
-  }, [location, getReservationById, setLocation]);
+  }, [loaded, location, getReservationById, setLocation]);
 
   const handleFormSubmit = (data: Reservation) => {
     console.log("Reserva creada:", data);
@@ -42,6 +44,13 @@ export default function Home() {
     setReservation(null);
   };
 
+  const handleSaveSuccess = (id: string) => {
+    setSavedReservationId(id);
+    if (reservation) {
+      setReservation({ ...reservation, id });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -53,7 +62,12 @@ export default function Home() {
             savedReservationId={savedReservationId}
           />
         ) : (
-          <PDFPreview reservation={reservation} onDownload={handleDownload} onBack={handleBack} />
+          <PDFPreview 
+            reservation={reservation} 
+            onDownload={handleDownload} 
+            onBack={handleBack}
+            onSaveSuccess={handleSaveSuccess}
+          />
         )}
       </main>
     </div>

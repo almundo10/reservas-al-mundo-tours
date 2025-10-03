@@ -6,6 +6,7 @@ const STORAGE_KEY = "almundo_saved_reservations";
 export function useSavedReservations() {
   const [reservations, setReservations] = useState<SavedReservation[]>([]);
   const [storageError, setStorageError] = useState<string | null>(null);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -18,6 +19,7 @@ export function useSavedReservations() {
         setStorageError("Error al cargar las reservas guardadas");
       }
     }
+    setLoaded(true);
   }, []);
 
   const saveToStorage = (newReservations: SavedReservation[]): { success: boolean; error?: string } => {
@@ -39,7 +41,7 @@ export function useSavedReservations() {
     }
   };
 
-  const addReservation = (reservationData: InsertSavedReservation): { success: boolean; reservation?: SavedReservation; error?: string } => {
+  const addReservation = (reservationData: InsertSavedReservation): { success: boolean; id?: string; reservation?: SavedReservation; error?: string } => {
     const now = new Date().toISOString();
     const newReservation: SavedReservation = {
       ...reservationData,
@@ -49,7 +51,7 @@ export function useSavedReservations() {
     };
     const updated = [...reservations, newReservation];
     const result = saveToStorage(updated);
-    return result.success ? { success: true, reservation: newReservation } : { success: false, error: result.error };
+    return result.success ? { success: true, id: newReservation.id, reservation: newReservation } : { success: false, error: result.error };
   };
 
   const updateReservation = (id: string, reservationData: Partial<InsertSavedReservation>): { success: boolean; error?: string } => {
@@ -80,6 +82,7 @@ export function useSavedReservations() {
 
   return {
     reservations,
+    loaded,
     addReservation,
     updateReservation,
     deleteReservation,

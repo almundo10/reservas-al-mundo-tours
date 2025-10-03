@@ -14,9 +14,10 @@ interface PDFPreviewProps {
   reservation: Reservation;
   onDownload: () => void;
   onBack?: () => void;
+  onSaveSuccess?: (id: string) => void;
 }
 
-export function PDFPreview({ reservation, onDownload, onBack }: PDFPreviewProps) {
+export function PDFPreview({ reservation, onDownload, onBack, onSaveSuccess }: PDFPreviewProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [nombreReserva, setNombreReserva] = useState("");
@@ -56,6 +57,7 @@ export function PDFPreview({ reservation, onDownload, onBack }: PDFPreviewProps)
   const handleSaveReservation = () => {
     if (reservation.id) {
       const existing = getReservationById(reservation.id);
+      
       if (existing) {
         const result = updateReservation(reservation.id, {
           nombreReserva: nombreReserva || undefined,
@@ -69,6 +71,9 @@ export function PDFPreview({ reservation, onDownload, onBack }: PDFPreviewProps)
           });
           setSaveDialogOpen(false);
           setNombreReserva("");
+          if (onSaveSuccess) {
+            onSaveSuccess(reservation.id);
+          }
         } else {
           toast({
             title: "Error al actualizar",
@@ -84,14 +89,17 @@ export function PDFPreview({ reservation, onDownload, onBack }: PDFPreviewProps)
       nombreReserva: nombreReserva || undefined,
       reserva: reservation,
     });
-
-    if (result.success) {
+    
+    if (result.success && result.id) {
       toast({
         title: "Reserva guardada",
         description: "La reserva se ha guardado correctamente",
       });
       setSaveDialogOpen(false);
       setNombreReserva("");
+      if (onSaveSuccess) {
+        onSaveSuccess(result.id);
+      }
     } else {
       toast({
         title: "Error al guardar",

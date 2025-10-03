@@ -88,12 +88,14 @@ export default function SavedReservations() {
                       <User className="w-3 h-3" />
                       <span data-testid={`text-cliente-${id}`}>{reserva.nombreCliente}</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-3 h-3" />
-                      <span data-testid={`text-fechas-${id}`}>
-                        {format(new Date(reserva.fechaInicioViaje), "dd MMM", { locale: es })} - {format(new Date(reserva.fechaFinViaje), "dd MMM yyyy", { locale: es })}
-                      </span>
-                    </div>
+                    {reserva.fechaInicioViaje && reserva.fechaFinViaje && (
+                      <div className="flex items-center gap-1">
+                        <Calendar className="w-3 h-3" />
+                        <span data-testid={`text-fechas-${id}`}>
+                          {format(new Date(reserva.fechaInicioViaje), "dd MMM", { locale: es })} - {format(new Date(reserva.fechaFinViaje), "dd MMM yyyy", { locale: es })}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
