@@ -13,6 +13,8 @@ export class PDFGenerator {
   private lightGray = "#f5f5f5";
   private logoData: string | null = null;
   private logoFormat: 'JPEG' | 'PNG' | null = null;
+  private logoDataBlanco: string | null = null;
+  private logoFormatBlanco: 'JPEG' | 'PNG' | null = null;
   private currentPageNumber: number = 1;
   private agencyConfig: AgencyConfig;
 
@@ -34,7 +36,17 @@ export class PDFGenerator {
       this.logoData = data;
       this.logoFormat = format;
     } catch (error) {
-      console.warn("Could not load logo, will use text fallback", error);
+      console.warn("Could not load color logo, will use text fallback", error);
+    }
+
+    try {
+      if (this.agencyConfig.logoUrlBlanco) {
+        const { data, format } = await this.prepareImageForPDF(this.agencyConfig.logoUrlBlanco);
+        this.logoDataBlanco = data;
+        this.logoFormatBlanco = format;
+      }
+    } catch (error) {
+      console.warn("Could not load white logo, will use color logo in header", error);
     }
 
     await this.addCoverPage(reservation);
@@ -60,15 +72,11 @@ export class PDFGenerator {
       
       try {
         const bannerUrl = reservation.destinos[0].imagenBanner;
-        console.log('Banner URL exists:', !!bannerUrl, 'starts with http:', bannerUrl?.startsWith('http'), 'starts with data:', bannerUrl?.startsWith('data:image/'));
         
         if (bannerUrl && (bannerUrl.startsWith('http') || bannerUrl.startsWith('data:image/'))) {
-          console.log('Processing banner image...');
           const { data, format } = await this.prepareImageForPDF(bannerUrl);
-          console.log('Banner prepared, format:', format, 'data length:', data.length);
           
           this.doc.addImage(data, format, this.margin, this.currentY, bannerWidth, bannerHeight);
-          console.log('Banner image added to PDF successfully');
           
           (this.doc as any).saveGraphicsState();
           (this.doc as any).setGState(new (this.doc as any).GState({ opacity: 0.4 }));
@@ -76,12 +84,11 @@ export class PDFGenerator {
           this.doc.rect(this.margin, this.currentY, bannerWidth, bannerHeight, "F");
           (this.doc as any).restoreGraphicsState();
         } else {
-          console.log('Banner URL invalid, using fallback rectangle');
           this.doc.setFillColor(this.primaryColor);
           this.doc.rect(this.margin, this.currentY, bannerWidth, bannerHeight, "F");
         }
       } catch (error) {
-        console.error("Error loading banner image:", error);
+        console.warn("Could not load banner image, using fallback", error);
         this.doc.setFillColor(this.primaryColor);
         this.doc.rect(this.margin, this.currentY, bannerWidth, bannerHeight, "F");
       }
@@ -119,6 +126,9 @@ export class PDFGenerator {
     this.currentY += 20;
     this.addPassengerList(reservation);
 
+    this.currentY += 15;
+    this.addBodyLogo();
+
     this.addFooter();
   }
 
@@ -126,11 +136,14 @@ export class PDFGenerator {
     this.doc.setFillColor(this.primaryColor);
     this.doc.rect(0, 0, this.pageWidth, 15, "F");
     
-    if (this.logoData && this.logoFormat) {
+    const headerLogoData = this.logoDataBlanco || this.logoData;
+    const headerLogoFormat = this.logoFormatBlanco || this.logoFormat;
+    
+    if (headerLogoData && headerLogoFormat) {
       const logoHeight = 10;
       const logoWidth = 40;
       try {
-        this.doc.addImage(this.logoData, this.logoFormat, this.margin, 2.5, logoWidth, logoHeight);
+        this.doc.addImage(headerLogoData, headerLogoFormat, this.margin, 2.5, logoWidth, logoHeight);
       } catch (error) {
         console.warn("Could not add logo to header", error);
         this.doc.setTextColor(255, 255, 255);
@@ -272,6 +285,41 @@ export class PDFGenerator {
 
       this.currentY += 12;
     });
+  }
+
+  private addBodyLogo() {
+    if (!this.logoData || !this.logoFormat) {
+      return;
+    }
+
+    try {
+      const logoWidth = 50;
+      const logoHeight = 25;
+      const xPosition = this.pageWidth - this.margin - logoWidth;
+      
+      this.doc.addImage(
+        this.logoData,
+        this.logoFormat,
+        xPosition,
+        this.currentY,
+        logoWidth,
+        logoHeight
+      );
+      
+      this.doc.setFontSize(8);
+      this.doc.setTextColor(100, 100, 100);
+      this.doc.setFont("helvetica", "normal");
+      this.doc.text(
+        this.agencyConfig.nombre.toUpperCase(),
+        xPosition + logoWidth / 2,
+        this.currentY + logoHeight + 4,
+        { align: "center" }
+      );
+      
+      this.currentY += logoHeight + 8;
+    } catch (error) {
+      console.warn("Could not add body logo", error);
+    }
   }
 
   private async addItinerary(reservation: Reservation) {
@@ -839,12 +887,9 @@ export class PDFGenerator {
     }
     
     const format = this.getImageFormat(imgData);
-    console.log('Detected image format:', format, 'for URL starting with:', imageUrl.substring(0, 50));
     
     if (format === 'WEBP') {
-      console.log('Converting WEBP to JPEG...');
       imgData = await this.convertWebPToJPEG(imgData);
-      console.log('WEBP converted successfully to JPEG');
       return { data: imgData, format: 'JPEG' };
     }
     

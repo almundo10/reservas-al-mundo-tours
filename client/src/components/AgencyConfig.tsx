@@ -106,7 +106,7 @@ export function AgencyConfig() {
             </div>
 
             <div className="md:col-span-2">
-              <Label htmlFor="logoUrl" data-testid="label-logo-agencia">URL del Logo</Label>
+              <Label htmlFor="logoUrl" data-testid="label-logo-agencia">Logo en Color (para cuerpo y footer)</Label>
               <Input
                 id="logoUrl"
                 data-testid="input-logo-agencia"
@@ -115,7 +115,21 @@ export function AgencyConfig() {
                 placeholder="/attached_assets/logo.png"
               />
               <p className="text-sm text-muted-foreground mt-1">
-                Ruta relativa del archivo de logo (ejemplo: /attached_assets/logo.png)
+                Ruta del logo en color para el cuerpo del documento y footer
+              </p>
+            </div>
+
+            <div className="md:col-span-2">
+              <Label htmlFor="logoUrlBlanco" data-testid="label-logo-blanco-agencia">Logo Blanco (para header azul)</Label>
+              <Input
+                id="logoUrlBlanco"
+                data-testid="input-logo-blanco-agencia"
+                value={formData.logoUrlBlanco || ""}
+                onChange={(e) => setFormData({ ...formData, logoUrlBlanco: e.target.value })}
+                placeholder="/attached_assets/logo-blanco.png"
+              />
+              <p className="text-sm text-muted-foreground mt-1">
+                Ruta del logo blanco para el header azul del documento
               </p>
             </div>
           </div>

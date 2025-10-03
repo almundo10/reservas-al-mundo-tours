@@ -162,6 +162,7 @@ export const agencyConfigSchema = z.object({
   email: z.string().email().optional(),
   telefono: z.string().optional(),
   logoUrl: z.string().optional(),
+  logoUrlBlanco: z.string().optional(),
 });
 
 export type AgencyConfig = z.infer<typeof agencyConfigSchema>;
