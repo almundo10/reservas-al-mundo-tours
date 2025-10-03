@@ -13,6 +13,8 @@ export class PDFGenerator {
   private cyanColor = "#50BFD6";
   private textColor = "#333333";
   private lightGray = "#f5f5f5";
+  private logoData: string | null = null;
+  private currentPageNumber: number = 1;
 
   constructor() {
     this.doc = new jsPDF({
@@ -25,7 +27,16 @@ export class PDFGenerator {
   }
 
   async generate(reservation: Reservation): Promise<Blob> {
+    try {
+      this.logoData = await this.loadImageAsDataURL("/attached_assets/logo_1759457415381.png");
+    } catch (error) {
+      console.warn("Could not load logo, will use text fallback", error);
+    }
+
     await this.addCoverPage(reservation);
+    this.currentPageNumber = 1;
+    this.addFooter();
+    
     await this.addItinerary(reservation);
     await this.addFlightsPage(reservation);
     await this.addPackageDetails(reservation);
@@ -204,9 +215,7 @@ export class PDFGenerator {
 
     reservation.pasajeros.forEach((pasajero, idx) => {
       if (this.currentY > this.pageHeight - 40) {
-        this.doc.addPage();
-        this.currentY = 30;
-        this.addHeader();
+        this.addNewPage();
       }
 
       if (idx % 2 === 0) {
@@ -216,12 +225,12 @@ export class PDFGenerator {
       }
       this.doc.rect(this.margin, this.currentY, this.pageWidth - 2 * this.margin, 12, "F");
 
-      this.doc.setFontSize(9);
+      this.doc.setFontSize(10);
       this.doc.setFont("helvetica", "normal");
       this.doc.setTextColor(this.textColor);
       this.doc.text(`${idx + 1}. ${pasajero.nombre}`, this.margin + 5, this.currentY + 6);
 
-      this.doc.setFontSize(8);
+      this.doc.setFontSize(9);
       this.doc.setTextColor(120, 120, 120);
       this.doc.text(
         `Doc: ${pasajero.numeroDocumento} | F. Nac: ${pasajero.fechaNacimiento}`,
@@ -238,9 +247,7 @@ export class PDFGenerator {
       return;
     }
 
-    this.doc.addPage();
-    this.currentY = 30;
-    this.addHeader();
+    this.addNewPage();
 
     this.doc.setTextColor(this.textColor);
     this.doc.setFontSize(16);
@@ -251,9 +258,7 @@ export class PDFGenerator {
 
     for (const destino of reservation.destinos) {
       if (this.currentY > this.pageHeight - 80) {
-        this.doc.addPage();
-        this.currentY = 30;
-        this.addHeader();
+        this.addNewPage();
       }
 
       this.doc.setFillColor(this.primaryColor);
@@ -271,7 +276,7 @@ export class PDFGenerator {
       this.currentY += 15;
 
       this.doc.setTextColor(this.textColor);
-      this.doc.setFontSize(9);
+      this.doc.setFontSize(10);
       this.doc.setFont("helvetica", "normal");
       this.doc.text(
         `${destino.fechaInicio} - ${destino.fechaFin}`,
@@ -311,13 +316,13 @@ export class PDFGenerator {
     this.doc.rect(this.margin + 5, this.currentY, this.pageWidth - 2 * this.margin - 10, 8, "F");
 
     this.doc.setTextColor(this.orangeColor);
-    this.doc.setFontSize(10);
+    this.doc.setFontSize(11);
     this.doc.setFont("helvetica", "bold");
     this.doc.text(`🏨 ${hotel.nombre}`, this.margin + 10, this.currentY + 5);
 
     this.currentY += 12;
 
-    this.doc.setFontSize(8);
+    this.doc.setFontSize(9);
     this.doc.setFont("helvetica", "normal");
     this.doc.setTextColor(this.textColor);
     const hotelDetails = [];
@@ -389,9 +394,7 @@ export class PDFGenerator {
 
     tours.forEach((tour, idx) => {
       if (this.currentY > this.pageHeight - 40) {
-        this.doc.addPage();
-        this.currentY = 30;
-        this.addHeader();
+        this.addNewPage();
       }
 
       this.doc.setFontSize(9);
@@ -435,9 +438,7 @@ export class PDFGenerator {
 
     transfers.forEach((transfer) => {
       if (this.currentY > this.pageHeight - 40) {
-        this.doc.addPage();
-        this.currentY = 30;
-        this.addHeader();
+        this.addNewPage();
       }
 
       this.doc.setFontSize(9);
@@ -467,9 +468,7 @@ export class PDFGenerator {
       return;
     }
 
-    this.doc.addPage();
-    this.currentY = 30;
-    this.addHeader();
+    this.addNewPage();
 
     this.doc.setTextColor(this.purpleColor);
     this.doc.setFontSize(16);
@@ -480,9 +479,7 @@ export class PDFGenerator {
 
     for (const vuelo of reservation.vuelos) {
       if (this.currentY > this.pageHeight - 70) {
-        this.doc.addPage();
-        this.currentY = 30;
-        this.addHeader();
+        this.addNewPage();
       }
 
       this.doc.setFillColor(this.lightGray);
@@ -550,14 +547,10 @@ export class PDFGenerator {
 
       this.currentY += 12;
     }
-
-    this.addFooter(3);
   }
 
   private async addPackageDetails(reservation: Reservation) {
-    this.doc.addPage();
-    this.currentY = 30;
-    this.addHeader();
+    this.addNewPage();
 
     this.doc.setTextColor(this.textColor);
     this.doc.setFontSize(16);
@@ -586,9 +579,7 @@ export class PDFGenerator {
       reservation.incluye.forEach((item) => {
         if (item && item.trim()) {
           if (this.currentY > this.pageHeight - 40) {
-            this.doc.addPage();
-            this.currentY = 30;
-            this.addHeader();
+            this.addNewPage();
           }
           this.doc.text(`• ${item}`, this.margin + 5, this.currentY);
           this.currentY += 5;
@@ -670,14 +661,10 @@ export class PDFGenerator {
         });
       }
     }
-
-    this.addFooter(4);
   }
 
   private async addTermsAndConditions(reservation: Reservation) {
-    this.doc.addPage();
-    this.currentY = 30;
-    this.addHeader();
+    this.addNewPage();
 
     this.doc.setTextColor(this.textColor);
     this.doc.setFontSize(16);
@@ -741,8 +728,6 @@ export class PDFGenerator {
       );
       this.doc.text(notasLines, this.margin, this.currentY);
     }
-
-    this.addFooter(5);
   }
 
   private async loadImageAsDataURL(url: string): Promise<string> {
@@ -774,33 +759,50 @@ export class PDFGenerator {
     });
   }
 
-  private addFooter(pageNum: number) {
-    const footerY = this.pageHeight - 15;
+  private addNewPage() {
+    this.doc.addPage();
+    this.currentPageNumber++;
+    this.currentY = 30;
+    this.addHeader();
+    this.addFooter();
+  }
+
+  private addFooter() {
+    const footerY = this.pageHeight - 18;
 
     this.doc.setDrawColor(this.orangeColor);
     this.doc.setLineWidth(0.5);
     this.doc.line(this.margin, footerY - 3, this.pageWidth - this.margin, footerY - 3);
 
+    // Logo on the left
+    if (this.logoData) {
+      try {
+        this.doc.addImage(this.logoData, 'PNG', this.margin, footerY - 2, 25, 12);
+      } catch (error) {
+        console.warn("Could not add logo to footer", error);
+        this.doc.setFontSize(9);
+        this.doc.setTextColor(100, 100, 100);
+        this.doc.setFont("helvetica", "bold");
+        this.doc.text("AL Mundo Tours", this.margin, footerY + 3);
+      }
+    } else {
+      this.doc.setFontSize(9);
+      this.doc.setTextColor(100, 100, 100);
+      this.doc.setFont("helvetica", "bold");
+      this.doc.text("AL Mundo Tours", this.margin, footerY + 3);
+    }
+
+    // Company info in center
     this.doc.setFontSize(8);
     this.doc.setTextColor(100, 100, 100);
     this.doc.setFont("helvetica", "normal");
+    this.doc.text("Calle 38 No 21-31, Tuluá – Colombia", this.pageWidth / 2, footerY + 2, { align: "center" });
+    this.doc.text("Tel: +57 (601) 745 89 00 | infos@almundotours.com", this.pageWidth / 2, footerY + 6, { align: "center" });
 
-    this.doc.text("AL Mundo Tours", this.pageWidth / 2, footerY, { align: "center" });
-    this.doc.text(
-      "Calle 38 No 21-31, Tuluá – Colombia",
-      this.pageWidth / 2,
-      footerY + 4,
-      { align: "center" }
-    );
-    this.doc.text(
-      "Tel: +57 (601) 745 89 00 | infos@almundotours.com",
-      this.pageWidth / 2,
-      footerY + 8,
-      { align: "center" }
-    );
-
-    this.doc.setFontSize(7);
-    this.doc.text(`Página ${pageNum}`, this.pageWidth - this.margin, footerY, { align: "right" });
+    // Page number on the right
+    this.doc.setFontSize(9);
+    this.doc.setFont("helvetica", "normal");
+    this.doc.text(`Página ${this.currentPageNumber}`, this.pageWidth - this.margin, footerY + 4, { align: "right" });
   }
 }
 
