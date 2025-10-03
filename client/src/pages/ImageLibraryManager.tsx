@@ -11,7 +11,7 @@ import { ImageIcon, Upload, Trash2, Edit, Filter } from "lucide-react";
 import type { ImageLibrary as ImageLibraryType } from "@shared/schema";
 
 export default function ImageLibraryManager() {
-  const { images, addImage, deleteImage, updateImage } = useImageLibrary();
+  const { images, addImage, deleteImage, updateImage, storageError, clearStorageError } = useImageLibrary();
   const { toast } = useToast();
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
@@ -38,10 +38,10 @@ export default function ImageLibraryManager() {
       return;
     }
 
-    if (file.size > 2 * 1024 * 1024) {
+    if (file.size > 1 * 1024 * 1024) {
       toast({
         title: "Error",
-        description: "La imagen no debe superar 2MB",
+        description: "La imagen no debe superar 1MB. Por favor reduce el tamaño de la imagen.",
         variant: "destructive",
       });
       return;
@@ -65,46 +65,68 @@ export default function ImageLibraryManager() {
       return;
     }
 
-    addImage({
+    const result = addImage({
       nombre: uploadForm.nombre,
       categoria: uploadForm.categoria,
       url: uploadForm.url,
       tags: uploadForm.tags ? uploadForm.tags.split(",").map(t => t.trim()) : [],
     });
 
-    toast({
-      title: "Imagen agregada",
-      description: "La imagen se ha agregado a la biblioteca",
-    });
-
-    setUploadForm({ nombre: "", categoria: "hotel", tags: "", url: "" });
-    setUploadDialogOpen(false);
+    if (result.success) {
+      toast({
+        title: "Imagen agregada",
+        description: "La imagen se ha agregado a la biblioteca",
+      });
+      setUploadForm({ nombre: "", categoria: "hotel", tags: "", url: "" });
+      setUploadDialogOpen(false);
+    } else {
+      toast({
+        title: "Error al guardar",
+        description: result.error || "No se pudo guardar la imagen",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleEdit = () => {
     if (!selectedImage) return;
 
-    updateImage(selectedImage.id, {
+    const result = updateImage(selectedImage.id, {
       nombre: selectedImage.nombre,
       tags: selectedImage.tags,
     });
 
-    toast({
-      title: "Imagen actualizada",
-      description: "Los cambios se han guardado correctamente",
-    });
-
-    setEditDialogOpen(false);
-    setSelectedImage(null);
+    if (result.success) {
+      toast({
+        title: "Imagen actualizada",
+        description: "Los cambios se han guardado correctamente",
+      });
+      setEditDialogOpen(false);
+      setSelectedImage(null);
+    } else {
+      toast({
+        title: "Error al actualizar",
+        description: result.error || "No se pudo actualizar la imagen",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDelete = (id: string) => {
     if (confirm("¿Estás seguro de eliminar esta imagen?")) {
-      deleteImage(id);
-      toast({
-        title: "Imagen eliminada",
-        description: "La imagen se ha eliminado de la biblioteca",
-      });
+      const result = deleteImage(id);
+      if (result.success) {
+        toast({
+          title: "Imagen eliminada",
+          description: "La imagen se ha eliminado de la biblioteca",
+        });
+      } else {
+        toast({
+          title: "Error al eliminar",
+          description: result.error || "No se pudo eliminar la imagen",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -203,7 +225,7 @@ export default function ImageLibraryManager() {
               </div>
 
               <div>
-                <Label htmlFor="upload-file">Archivo de Imagen (max 2MB)</Label>
+                <Label htmlFor="upload-file">Archivo de Imagen (max 1MB)</Label>
                 <Input
                   id="upload-file"
                   data-testid="input-upload-file"
