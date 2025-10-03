@@ -322,6 +322,7 @@ export class PDFGenerator {
     this.doc.setTextColor(this.textColor);
     const hotelDetails = [];
     if (hotel.tipoHabitacion) hotelDetails.push(`Habitación: ${hotel.tipoHabitacion}`);
+    if (hotel.numeroHabitaciones) hotelDetails.push(`${hotel.numeroHabitaciones} habitación(es)`);
     if (hotel.planAlimentacion) hotelDetails.push(`Plan: ${hotel.planAlimentacion}`);
     if (hotel.noches) hotelDetails.push(`${hotel.noches} noche(s)`);
 
@@ -331,8 +332,12 @@ export class PDFGenerator {
     }
 
     if (hotel.checkIn && hotel.checkOut) {
+      let checkInText = `Check-in: ${hotel.checkIn}`;
+      if (hotel.horaCheckIn) checkInText += ` ${hotel.horaCheckIn}`;
+      let checkOutText = `Check-out: ${hotel.checkOut}`;
+      if (hotel.horaCheckOut) checkOutText += ` ${hotel.horaCheckOut}`;
       this.doc.text(
-        `Check-in: ${hotel.checkIn} | Check-out: ${hotel.checkOut}`,
+        `${checkInText} | ${checkOutText}`,
         this.margin + 10,
         this.currentY
       );

@@ -259,6 +259,17 @@ export function ReservationForm({ onSubmit }: ReservationFormProps) {
               />
             </div>
             <div>
+              <Label htmlFor="telefonoResponsable" data-testid="label-telefono-responsable">Teléfono del Responsable</Label>
+              <Input
+                id="telefonoResponsable"
+                data-testid="input-telefono-responsable"
+                type="tel"
+                placeholder="+57 300 123 4567"
+                value={formData.telefonoResponsable || ""}
+                onChange={(e) => setFormData({ ...formData, telefonoResponsable: e.target.value })}
+              />
+            </div>
+            <div>
               <Label htmlFor="cantidadAdultos" data-testid="label-cantidad-adultos">Cantidad de Adultos</Label>
               <Input
                 id="cantidadAdultos"

@@ -199,12 +199,30 @@ export function DestinationEditor({
                 />
               </div>
               <div>
+                <Label data-testid={`label-hotel-hora-checkin-${destination.id}`}>Hora Check-in</Label>
+                <Input
+                  type="time"
+                  value={destination.hotel?.horaCheckIn || ""}
+                  onChange={(e) => updateHotel("horaCheckIn", e.target.value)}
+                  data-testid={`input-hotel-hora-checkin-${destination.id}`}
+                />
+              </div>
+              <div>
                 <Label data-testid={`label-hotel-checkout-${destination.id}`}>Check-out</Label>
                 <Input
                   type="date"
                   value={destination.hotel?.checkOut || ""}
                   onChange={(e) => updateHotel("checkOut", e.target.value)}
                   data-testid={`input-hotel-checkout-${destination.id}`}
+                />
+              </div>
+              <div>
+                <Label data-testid={`label-hotel-hora-checkout-${destination.id}`}>Hora Check-out</Label>
+                <Input
+                  type="time"
+                  value={destination.hotel?.horaCheckOut || ""}
+                  onChange={(e) => updateHotel("horaCheckOut", e.target.value)}
+                  data-testid={`input-hotel-hora-checkout-${destination.id}`}
                 />
               </div>
               <div>
@@ -215,6 +233,16 @@ export function DestinationEditor({
                   value={destination.hotel?.noches || 1}
                   onChange={(e) => updateHotel("noches", parseInt(e.target.value) || 1)}
                   data-testid={`input-hotel-noches-${destination.id}`}
+                />
+              </div>
+              <div>
+                <Label data-testid={`label-hotel-habitaciones-${destination.id}`}>Número de Habitaciones</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  value={destination.hotel?.numeroHabitaciones || 1}
+                  onChange={(e) => updateHotel("numeroHabitaciones", parseInt(e.target.value) || 1)}
+                  data-testid={`input-hotel-habitaciones-${destination.id}`}
                 />
               </div>
               <div>
