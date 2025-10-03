@@ -149,3 +149,15 @@ export const imageLibrarySchema = z.object({
 });
 
 export type ImageLibrary = z.infer<typeof imageLibrarySchema>;
+
+// Agency configuration types
+export const agencyConfigSchema = z.object({
+  nombre: z.string().default("AL Mundo Tours"),
+  direccion: z.string().optional(),
+  ciudad: z.string().optional(),
+  email: z.string().email().optional(),
+  telefono: z.string().optional(),
+  logoUrl: z.string().optional(),
+});
+
+export type AgencyConfig = z.infer<typeof agencyConfigSchema>;
