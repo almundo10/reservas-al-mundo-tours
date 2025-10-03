@@ -5,6 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Plus, Trash2, Image as ImageIcon, Building2, Compass, Car } from "lucide-react";
 import { ImageLibrary } from "./ImageLibrary";
 import type { Destination, Hotel, Tour, Transfer } from "@shared/schema";
@@ -29,6 +30,9 @@ export function DestinationEditor({
 }: DestinationEditorProps) {
   const [showImageLibrary, setShowImageLibrary] = useState(false);
   const [hotelImageLibraryOpen, setHotelImageLibraryOpen] = useState(false);
+  
+  const predefinedDestinations = ["San Andrés", "Cartagena", "Bogotá", "Medellín", "Eje Cafetero", "Santa Marta"];
+  const [isCustomDestination, setIsCustomDestination] = useState(!predefinedDestinations.includes(destination.nombre));
 
   const updateHotel = (field: keyof Hotel, value: any) => {
     const updatedHotel = destination.hotel
@@ -93,21 +97,51 @@ export function DestinationEditor({
 
           <TabsContent value="info" className="space-y-4 mt-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
+              <div className="space-y-2">
                 <Label data-testid={`label-nombre-destino-${destination.id}`}>Nombre del Destino</Label>
-                <Select value={destination.nombre} onValueChange={(v) => onChange("nombre", v)}>
-                  <SelectTrigger data-testid={`select-nombre-destino-${destination.id}`}>
-                    <SelectValue placeholder="Seleccionar destino" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="San Andrés">San Andrés</SelectItem>
-                    <SelectItem value="Cartagena">Cartagena</SelectItem>
-                    <SelectItem value="Bogotá">Bogotá</SelectItem>
-                    <SelectItem value="Medellín">Medellín</SelectItem>
-                    <SelectItem value="Eje Cafetero">Eje Cafetero</SelectItem>
-                    <SelectItem value="Santa Marta">Santa Marta</SelectItem>
-                  </SelectContent>
-                </Select>
+                {!isCustomDestination ? (
+                  <Select value={destination.nombre} onValueChange={(v) => onChange("nombre", v)}>
+                    <SelectTrigger data-testid={`select-nombre-destino-${destination.id}`}>
+                      <SelectValue placeholder="Seleccionar destino" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="San Andrés">San Andrés</SelectItem>
+                      <SelectItem value="Cartagena">Cartagena</SelectItem>
+                      <SelectItem value="Bogotá">Bogotá</SelectItem>
+                      <SelectItem value="Medellín">Medellín</SelectItem>
+                      <SelectItem value="Eje Cafetero">Eje Cafetero</SelectItem>
+                      <SelectItem value="Santa Marta">Santa Marta</SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input
+                    value={destination.nombre}
+                    onChange={(e) => onChange("nombre", e.target.value)}
+                    placeholder="Ingrese el nombre del destino"
+                    data-testid={`input-nombre-destino-personalizado-${destination.id}`}
+                  />
+                )}
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`custom-destination-${destination.id}`}
+                    checked={isCustomDestination}
+                    onCheckedChange={(checked) => {
+                      setIsCustomDestination(!!checked);
+                      if (checked) {
+                        onChange("nombre", "");
+                      } else {
+                        onChange("nombre", predefinedDestinations[0]);
+                      }
+                    }}
+                    data-testid={`checkbox-destino-personalizado-${destination.id}`}
+                  />
+                  <label
+                    htmlFor={`custom-destination-${destination.id}`}
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Destino personalizado
+                  </label>
+                </div>
               </div>
               <div>
                 <Label data-testid={`label-pais-${destination.id}`}>País</Label>

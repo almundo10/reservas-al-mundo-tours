@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Image as ImageIcon, Plane } from "lucide-react";
 import { ImageLibrary } from "./ImageLibrary";
@@ -27,6 +28,8 @@ export function FlightEditor({ flight, onChange }: FlightEditorProps) {
     "American Airlines",
     "United Airlines",
   ];
+  
+  const [isCustomAirline, setIsCustomAirline] = useState(!airlines.includes(flight.aerolinea));
 
   return (
     <Card className="p-4">
@@ -37,20 +40,50 @@ export function FlightEditor({ flight, onChange }: FlightEditorProps) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
+          <div className="space-y-2">
             <Label data-testid={`label-aerolinea-${flight.id}`}>Aerolínea</Label>
-            <Select value={flight.aerolinea} onValueChange={(v) => onChange("aerolinea", v)}>
-              <SelectTrigger data-testid={`select-aerolinea-${flight.id}`}>
-                <SelectValue placeholder="Seleccionar aerolínea" />
-              </SelectTrigger>
-              <SelectContent>
-                {airlines.map((airline) => (
-                  <SelectItem key={airline} value={airline}>
-                    {airline}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {!isCustomAirline ? (
+              <Select value={flight.aerolinea} onValueChange={(v) => onChange("aerolinea", v)}>
+                <SelectTrigger data-testid={`select-aerolinea-${flight.id}`}>
+                  <SelectValue placeholder="Seleccionar aerolínea" />
+                </SelectTrigger>
+                <SelectContent>
+                  {airlines.map((airline) => (
+                    <SelectItem key={airline} value={airline}>
+                      {airline}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input
+                value={flight.aerolinea}
+                onChange={(e) => onChange("aerolinea", e.target.value)}
+                placeholder="Ingrese el nombre de la aerolínea"
+                data-testid={`input-aerolinea-personalizada-${flight.id}`}
+              />
+            )}
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id={`custom-airline-${flight.id}`}
+                checked={isCustomAirline}
+                onCheckedChange={(checked) => {
+                  setIsCustomAirline(!!checked);
+                  if (checked) {
+                    onChange("aerolinea", "");
+                  } else {
+                    onChange("aerolinea", airlines[0]);
+                  }
+                }}
+                data-testid={`checkbox-aerolinea-personalizada-${flight.id}`}
+              />
+              <label
+                htmlFor={`custom-airline-${flight.id}`}
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+              >
+                Aerolínea personalizada
+              </label>
+            </div>
           </div>
 
           <div>
