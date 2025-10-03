@@ -309,7 +309,7 @@ export class PDFGenerator {
       if (destino.descripcion) {
         this.currentY += 6;
         const lines = this.doc.splitTextToSize(destino.descripcion, this.pageWidth - 2 * this.margin - 10);
-        this.doc.text(lines, this.margin + 5, this.currentY);
+        this.doc.text(lines, this.margin + 5, this.currentY, { align: 'justify', maxWidth: this.pageWidth - 2 * this.margin - 10 });
         this.currentY += lines.length * 5;
       }
 
@@ -450,7 +450,7 @@ export class PDFGenerator {
         this.doc.setFont("helvetica", "normal");
         this.doc.setFontSize(9);
         const lines = this.doc.splitTextToSize(tour.descripcion, this.pageWidth - 2 * this.margin - 20);
-        this.doc.text(lines, this.margin + 12, this.currentY);
+        this.doc.text(lines, this.margin + 12, this.currentY, { align: 'justify', maxWidth: this.pageWidth - 2 * this.margin - 20 });
         this.currentY += lines.length * 4;
       }
 
@@ -783,7 +783,7 @@ export class PDFGenerator {
         reservation.notasGenerales,
         this.pageWidth - 2 * this.margin
       );
-      this.doc.text(notasLines, this.margin, this.currentY);
+      this.doc.text(notasLines, this.margin, this.currentY, { align: 'justify', maxWidth: this.pageWidth - 2 * this.margin });
     }
   }
 
