@@ -151,6 +151,10 @@ export class PDFGenerator {
     this.doc.setFontSize(9);
     this.doc.setTextColor(120, 120, 120);
     this.doc.text(`Doc: ${reservation.documentoCliente}`, midPoint, this.currentY + 20);
+    
+    if (reservation.telefonoResponsable) {
+      this.doc.text(`Tel: ${reservation.telefonoResponsable}`, midPoint, this.currentY + 25);
+    }
 
     this.currentY += boxHeight;
   }
@@ -344,6 +348,20 @@ export class PDFGenerator {
       this.currentY += 5;
     }
 
+    const contactInfo = [];
+    if (hotel.direccion) contactInfo.push(`Dirección: ${hotel.direccion}`);
+    if (hotel.telefono) contactInfo.push(`Tel: ${hotel.telefono}`);
+    
+    if (contactInfo.length > 0) {
+      this.doc.text(contactInfo.join(" | "), this.margin + 10, this.currentY);
+      this.currentY += 5;
+    }
+
+    if (hotel.numeroReserva) {
+      this.doc.text(`Reserva: ${hotel.numeroReserva}`, this.margin + 10, this.currentY);
+      this.currentY += 5;
+    }
+
     if (hotel.fotos && hotel.fotos.length > 0) {
       this.currentY += 3;
       const photoWidth = 30;
@@ -412,10 +430,11 @@ export class PDFGenerator {
         this.currentY += lines.length * 4;
       }
 
-      if (tour.duracion || tour.horaInicio) {
+      if (tour.operador || tour.duracion || tour.horaInicio) {
         this.doc.setFontSize(9);
         this.doc.setTextColor(120, 120, 120);
         const tourInfo = [];
+        if (tour.operador) tourInfo.push(`Operador: ${tour.operador}`);
         if (tour.duracion) tourInfo.push(`Duración: ${tour.duracion}`);
         if (tour.horaInicio) tourInfo.push(`Hora: ${tour.horaInicio}`);
         this.doc.text(tourInfo.join(" | "), this.margin + 12, this.currentY);
@@ -657,6 +676,17 @@ export class PDFGenerator {
         this.doc.setFont("helvetica", "bold");
         this.doc.setTextColor(200, 0, 0);
         this.doc.text(reservation.saldoPendiente, this.pageWidth - this.margin - 10, this.currentY, {
+          align: "right",
+        });
+        this.currentY += 8;
+      }
+
+      if (reservation.fechaPlazoPago) {
+        this.doc.setFont("helvetica", "normal");
+        this.doc.setTextColor(this.textColor);
+        this.doc.text("Fecha Límite de Pago:", this.margin + 10, this.currentY);
+        this.doc.setFont("helvetica", "bold");
+        this.doc.text(reservation.fechaPlazoPago, this.pageWidth - this.margin - 10, this.currentY, {
           align: "right",
         });
       }
