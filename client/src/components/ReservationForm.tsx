@@ -635,6 +635,16 @@ export function ReservationForm({ onSubmit }: ReservationFormProps) {
               </div>
             </div>
             <div>
+              <Label htmlFor="fechaPlazoPago" data-testid="label-fecha-plazo">Fecha de Plazo de Pago</Label>
+              <Input
+                id="fechaPlazoPago"
+                data-testid="input-fecha-plazo"
+                type="date"
+                value={formData.fechaPlazoPago || ""}
+                onChange={(e) => setFormData({ ...formData, fechaPlazoPago: e.target.value })}
+              />
+            </div>
+            <div>
               <Label htmlFor="notasGenerales" data-testid="label-notas">Notas Generales</Label>
               <Textarea
                 id="notasGenerales"

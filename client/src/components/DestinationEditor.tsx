@@ -215,6 +215,33 @@ export function DestinationEditor({
                 />
               </div>
               <div>
+                <Label data-testid={`label-hotel-direccion-${destination.id}`}>Dirección</Label>
+                <Input
+                  value={destination.hotel?.direccion || ""}
+                  onChange={(e) => updateHotel("direccion", e.target.value)}
+                  placeholder="Calle 123 #45-67"
+                  data-testid={`input-hotel-direccion-${destination.id}`}
+                />
+              </div>
+              <div>
+                <Label data-testid={`label-hotel-telefono-${destination.id}`}>Teléfono</Label>
+                <Input
+                  value={destination.hotel?.telefono || ""}
+                  onChange={(e) => updateHotel("telefono", e.target.value)}
+                  placeholder="+57 300 123 4567"
+                  data-testid={`input-hotel-telefono-${destination.id}`}
+                />
+              </div>
+              <div>
+                <Label data-testid={`label-hotel-reserva-${destination.id}`}>Número de Reserva</Label>
+                <Input
+                  value={destination.hotel?.numeroReserva || ""}
+                  onChange={(e) => updateHotel("numeroReserva", e.target.value)}
+                  placeholder="HTL123456"
+                  data-testid={`input-hotel-reserva-${destination.id}`}
+                />
+              </div>
+              <div>
                 <Label data-testid={`label-hotel-tipo-${destination.id}`}>Tipo de Habitación</Label>
                 <Input
                   value={destination.hotel?.tipoHabitacion || ""}
@@ -343,6 +370,15 @@ export function DestinationEditor({
                       onChange={(e) => updateTour(tour.id, "nombre", e.target.value)}
                       placeholder="City Tour"
                       data-testid={`input-tour-nombre-${tour.id}`}
+                    />
+                  </div>
+                  <div>
+                    <Label data-testid={`label-tour-operador-${tour.id}`}>Operador del Tour</Label>
+                    <Input
+                      value={tour.operador || ""}
+                      onChange={(e) => updateTour(tour.id, "operador", e.target.value)}
+                      placeholder="Nombre del operador"
+                      data-testid={`input-tour-operador-${tour.id}`}
                     />
                   </div>
                   <div>
