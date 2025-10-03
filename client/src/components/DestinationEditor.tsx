@@ -187,8 +187,13 @@ export function DestinationEditor({
               <Label>Banner del Destino</Label>
               <div className="flex items-center gap-4 mt-2">
                 {destination.imagenBanner && (
-                  <div className="w-32 h-20 bg-muted rounded-md flex items-center justify-center overflow-hidden">
-                    <ImageIcon className="w-8 h-8 text-muted-foreground" />
+                  <div className="w-32 h-20 bg-muted rounded-md overflow-hidden">
+                    <img 
+                      src={destination.imagenBanner} 
+                      alt="Banner del destino" 
+                      className="w-full h-full object-cover"
+                      data-testid={`img-banner-${destination.id}`}
+                    />
                   </div>
                 )}
                 <Button
@@ -321,8 +326,13 @@ export function DestinationEditor({
               <Label>Fotos del Hotel</Label>
               <div className="grid grid-cols-4 gap-2 mt-2">
                 {destination.hotel?.fotos?.map((foto, idx) => (
-                  <div key={idx} className="relative aspect-video bg-muted rounded-md flex items-center justify-center">
-                    <ImageIcon className="w-6 h-6 text-muted-foreground" />
+                  <div key={idx} className="relative aspect-video bg-muted rounded-md overflow-hidden">
+                    <img 
+                      src={foto} 
+                      alt={`Hotel foto ${idx + 1}`} 
+                      className="w-full h-full object-cover"
+                      data-testid={`img-hotel-foto-${idx}`}
+                    />
                     <Button
                       size="icon"
                       variant="destructive"

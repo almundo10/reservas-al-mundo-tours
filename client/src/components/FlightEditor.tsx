@@ -193,8 +193,13 @@ export function FlightEditor({ flight, onChange }: FlightEditorProps) {
           <Label>Logo de la Aerolínea</Label>
           <div className="flex items-center gap-4 mt-2">
             {flight.logoAerolinea && (
-              <div className="w-24 h-16 bg-muted rounded-md flex items-center justify-center">
-                <ImageIcon className="w-6 h-6 text-muted-foreground" />
+              <div className="w-24 h-16 bg-muted rounded-md overflow-hidden">
+                <img 
+                  src={flight.logoAerolinea} 
+                  alt="Logo de la aerolínea" 
+                  className="w-full h-full object-contain p-1 bg-white"
+                  data-testid={`img-logo-aerolinea-${flight.id}`}
+                />
               </div>
             )}
             <Button
