@@ -8,13 +8,29 @@ The application features a multi-step form interface for data entry and generate
 
 ## Recent Changes (October 2025)
 
-### Agency Configuration System (NEW)
+### Agency Configuration System
 - **Schema**: Added `AgencyConfig` type with fields: nombre, direccion, ciudad, email, telefono, logoUrl
 - **Storage**: Configuration persisted in localStorage with key "almundo_agency_config"
 - **UI**: New `/config` route with editable form for agency settings
 - **Header Integration**: Dynamic header displays agency name and city from configuration
 - **PDF Integration**: Agency information (name, address, contact) dynamically inserted in PDF header, footer, and legal text
 - **Default Values**: Pre-configured with AL Mundo Tours information, fully customizable per agency
+
+### Image Library System
+- **Schema**: `LibraryImage` type with id, nombre, categoria (destino/aerolinea/vehiculo/hotel), etiquetas, base64Data
+- **Storage**: Images stored as base64 in localStorage with key "almundo_image_library", 1MB size limit per image
+- **UI**: New `/images` route with upload/edit/delete functionality and category filtering
+- **Error Handling**: QuotaExceededError detection with user feedback and storage quota management
+- **Integration**: ImageLibrary component for selecting images in destinations, hotels, flights, and transfers
+
+### Saved Reservations System
+- **Schema**: `SavedReservation` type with id, nombreReserva (optional), fechaGuardado, fechaUltimaModificacion, reserva (full Reservation object)
+- **Storage**: Reservations persisted in localStorage with key "almundo_saved_reservations"
+- **UI**: New `/reservas` route listing all saved reservations with load/delete actions
+- **Load from URL**: Supports `?load={id}` parameter to prefill form with saved reservation data
+- **Edit & Update**: Loaded reservations can be edited and saved again without creating duplicates
+- **ID Propagation**: Save operation returns ID, propagated via callback to ensure updates work correctly
+- **Race Condition Fix**: Added `loaded` flag to ensure localStorage data is ready before URL parameter loading
 
 ### Schema Updates
 - **Hotel fields added**: `telefono`, `direccion`, `numeroReserva`
