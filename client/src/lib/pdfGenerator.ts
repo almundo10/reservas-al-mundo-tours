@@ -29,7 +29,11 @@ export class PDFGenerator {
   async generate(reservation: Reservation): Promise<Blob> {
     try {
       const logoUrl = this.agencyConfig.logoUrl || "/attached_assets/logo_1759463703691.png";
-      this.logoData = await this.loadImageAsDataURL(logoUrl);
+      if (logoUrl.startsWith('data:image/')) {
+        this.logoData = logoUrl;
+      } else {
+        this.logoData = await this.loadImageAsDataURL(logoUrl);
+      }
     } catch (error) {
       console.warn("Could not load logo, will use text fallback", error);
     }
@@ -62,7 +66,8 @@ export class PDFGenerator {
           if (bannerUrl.startsWith('http')) {
             imgData = await this.loadImageAsDataURL(bannerUrl);
           }
-          this.doc.addImage(imgData, 'JPEG', this.margin, this.currentY, bannerWidth, bannerHeight);
+          const format = this.getImageFormat(imgData);
+          this.doc.addImage(imgData, format, this.margin, this.currentY, bannerWidth, bannerHeight);
           
           this.doc.setFillColor(0, 0, 0, 0.4);
           this.doc.rect(this.margin, this.currentY, bannerWidth, bannerHeight, "F");
@@ -120,7 +125,8 @@ export class PDFGenerator {
       const logoHeight = 10;
       const logoWidth = 40;
       try {
-        this.doc.addImage(this.logoData, 'PNG', this.margin, 2.5, logoWidth, logoHeight);
+        const format = this.getImageFormat(this.logoData);
+        this.doc.addImage(this.logoData, format, this.margin, 2.5, logoWidth, logoHeight);
       } catch (error) {
         console.warn("Could not add logo to header", error);
         this.doc.setTextColor(255, 255, 255);
@@ -407,7 +413,8 @@ export class PDFGenerator {
             if (photoUrl.startsWith('http')) {
               imgData = await this.loadImageAsDataURL(photoUrl);
             }
-            this.doc.addImage(imgData, 'JPEG', xPos, yPos, photoWidth, photoHeight);
+            const format = this.getImageFormat(imgData);
+            this.doc.addImage(imgData, format, xPos, yPos, photoWidth, photoHeight);
           } else {
             this.doc.setFillColor(220, 220, 220);
             this.doc.rect(xPos, yPos, photoWidth, photoHeight, "F");
@@ -537,7 +544,8 @@ export class PDFGenerator {
             if (logoUrl.startsWith('http')) {
               imgData = await this.loadImageAsDataURL(logoUrl);
             }
-            this.doc.addImage(imgData, 'PNG', this.pageWidth - this.margin - 25, this.currentY + 5, 20, 10);
+            const format = this.getImageFormat(imgData);
+            this.doc.addImage(imgData, format, this.pageWidth - this.margin - 25, this.currentY + 5, 20, 10);
           }
         } catch (error) {
           console.warn("Could not load airline logo", error);
@@ -787,6 +795,12 @@ export class PDFGenerator {
     }
   }
 
+  private getImageFormat(dataUrl: string): 'JPEG' | 'PNG' | 'WEBP' {
+    if (dataUrl.includes('data:image/png')) return 'PNG';
+    if (dataUrl.includes('data:image/webp')) return 'WEBP';
+    return 'JPEG';
+  }
+
   private async loadImageAsDataURL(url: string): Promise<string> {
     return new Promise((resolve, reject) => {
       const img = new Image();
@@ -834,7 +848,8 @@ export class PDFGenerator {
     // Logo on the left
     if (this.logoData) {
       try {
-        this.doc.addImage(this.logoData, 'PNG', this.margin, footerY - 2, 25, 12);
+        const format = this.getImageFormat(this.logoData);
+        this.doc.addImage(this.logoData, format, this.margin, footerY - 2, 25, 12);
       } catch (error) {
         console.warn("Could not add logo to footer", error);
         this.doc.setFontSize(9);
