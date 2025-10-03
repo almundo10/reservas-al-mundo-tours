@@ -7,8 +7,10 @@ export class PDFGenerator {
   private pageWidth: number;
   private margin: number = 20;
   private currentY: number = 20;
-  private primaryColor = "#0a6aa1";
-  private goldColor = "#f0a500";
+  private primaryColor = "#242553";
+  private orangeColor = "#F07E1A";
+  private purpleColor = "#74388D";
+  private cyanColor = "#50BFD6";
   private textColor = "#333333";
   private lightGray = "#f5f5f5";
 
@@ -146,7 +148,7 @@ export class PDFGenerator {
   }
 
   private addGlossary(reservation: Reservation) {
-    this.doc.setTextColor(this.goldColor);
+    this.doc.setTextColor(this.orangeColor);
     this.doc.setFontSize(12);
     this.doc.setFont("helvetica", "bold");
     this.doc.text("Glosario", this.margin, this.currentY);
@@ -157,12 +159,12 @@ export class PDFGenerator {
 
     const glossaryItems = [
       { label: "Destinos", value: reservation.destinos?.length || 0, color: this.primaryColor },
-      { label: "Vuelos", value: reservation.vuelos?.length || 0, color: this.goldColor },
-      { label: "Pasajeros", value: reservation.pasajeros?.length || 0, color: this.primaryColor },
+      { label: "Vuelos", value: reservation.vuelos?.length || 0, color: this.orangeColor },
+      { label: "Pasajeros", value: reservation.pasajeros?.length || 0, color: this.purpleColor },
       {
         label: "Tours",
         value: reservation.destinos?.reduce((acc, d) => acc + (d.tours?.length || 0), 0) || 0,
-        color: this.goldColor,
+        color: this.cyanColor,
       },
     ];
 
@@ -308,7 +310,7 @@ export class PDFGenerator {
     this.doc.setFillColor(240, 245, 255);
     this.doc.rect(this.margin + 5, this.currentY, this.pageWidth - 2 * this.margin - 10, 8, "F");
 
-    this.doc.setTextColor(this.goldColor);
+    this.doc.setTextColor(this.orangeColor);
     this.doc.setFontSize(10);
     this.doc.setFont("helvetica", "bold");
     this.doc.text(`🏨 ${hotel.nombre}`, this.margin + 10, this.currentY + 5);
@@ -380,7 +382,7 @@ export class PDFGenerator {
   private addToursSection(tours: any[]) {
     this.doc.setFontSize(10);
     this.doc.setFont("helvetica", "bold");
-    this.doc.setTextColor(this.goldColor);
+    this.doc.setTextColor(this.purpleColor);
     this.doc.text("Tours y Excursiones", this.margin + 5, this.currentY);
 
     this.currentY += 6;
@@ -426,7 +428,7 @@ export class PDFGenerator {
   private addTransfersSection(transfers: any[]) {
     this.doc.setFontSize(10);
     this.doc.setFont("helvetica", "bold");
-    this.doc.setTextColor(this.goldColor);
+    this.doc.setTextColor(this.cyanColor);
     this.doc.text("Traslados", this.margin + 5, this.currentY);
 
     this.currentY += 6;
@@ -469,7 +471,7 @@ export class PDFGenerator {
     this.currentY = 30;
     this.addHeader();
 
-    this.doc.setTextColor(this.goldColor);
+    this.doc.setTextColor(this.purpleColor);
     this.doc.setFontSize(16);
     this.doc.setFont("helvetica", "bold");
     this.doc.text("Información de Vuelos", this.margin, this.currentY);
@@ -626,7 +628,7 @@ export class PDFGenerator {
     if (reservation.precioTotal || reservation.abono || reservation.saldoPendiente) {
       this.currentY = Math.max(this.currentY, 140);
 
-      this.doc.setFillColor(this.goldColor);
+      this.doc.setFillColor(this.orangeColor);
       this.doc.rect(this.margin, this.currentY, this.pageWidth - 2 * this.margin, 10, "F");
 
       this.doc.setTextColor(255, 255, 255);
@@ -775,7 +777,7 @@ export class PDFGenerator {
   private addFooter(pageNum: number) {
     const footerY = this.pageHeight - 15;
 
-    this.doc.setDrawColor(this.goldColor);
+    this.doc.setDrawColor(this.orangeColor);
     this.doc.setLineWidth(0.5);
     this.doc.line(this.margin, footerY - 3, this.pageWidth - this.margin, footerY - 3);
 

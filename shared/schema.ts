@@ -64,7 +64,10 @@ export const hotelSchema = z.object({
   telefono: z.string().optional(),
   checkIn: z.string().optional(),
   checkOut: z.string().optional(),
+  horaCheckIn: z.string().optional(),
+  horaCheckOut: z.string().optional(),
   noches: z.number().default(1),
+  numeroHabitaciones: z.number().default(1),
   tipoHabitacion: z.string().optional(),
   planAlimentacion: z.string().optional(),
   fotos: z.array(z.string()).default([]),
@@ -98,6 +101,7 @@ export const reservationSchema = z.object({
   fechaCreacion: z.string().min(1, "Fecha de creación requerida"),
   nombreCliente: z.string().min(1, "Nombre del cliente requerido"),
   documentoCliente: z.string().min(1, "Documento del cliente requerido"),
+  telefonoResponsable: z.string().optional(),
   
   // Passenger counts
   cantidadAdultos: z.number().min(1, "Mínimo 1 adulto"),
