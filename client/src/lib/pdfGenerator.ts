@@ -26,7 +26,7 @@ export class PDFGenerator {
 
   async generate(reservation: Reservation): Promise<Blob> {
     try {
-      this.logoData = await this.loadImageAsDataURL("/attached_assets/logo_1759457415381.png");
+      this.logoData = await this.loadImageAsDataURL("/attached_assets/logo_1759463703691.png");
     } catch (error) {
       console.warn("Could not load logo, will use text fallback", error);
     }
@@ -110,11 +110,26 @@ export class PDFGenerator {
     this.doc.setFillColor(this.primaryColor);
     this.doc.rect(0, 0, this.pageWidth, 15, "F");
     
-    this.doc.setTextColor(255, 255, 255);
-    this.doc.setFontSize(14);
-    this.doc.setFont("helvetica", "bold");
-    this.doc.text("AL Mundo Tours", this.margin, 10);
+    if (this.logoData) {
+      const logoHeight = 10;
+      const logoWidth = 40;
+      try {
+        this.doc.addImage(this.logoData, 'PNG', this.margin, 2.5, logoWidth, logoHeight);
+      } catch (error) {
+        console.warn("Could not add logo to header", error);
+        this.doc.setTextColor(255, 255, 255);
+        this.doc.setFontSize(14);
+        this.doc.setFont("helvetica", "bold");
+        this.doc.text("AL Mundo Tours", this.margin, 10);
+      }
+    } else {
+      this.doc.setTextColor(255, 255, 255);
+      this.doc.setFontSize(14);
+      this.doc.setFont("helvetica", "bold");
+      this.doc.text("AL Mundo Tours", this.margin, 10);
+    }
     
+    this.doc.setTextColor(255, 255, 255);
     this.doc.setFontSize(9);
     this.doc.setFont("helvetica", "normal");
     this.doc.text("Tu viaje comienza aquí", this.pageWidth - this.margin, 10, { align: "right" });
