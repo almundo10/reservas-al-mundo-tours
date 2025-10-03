@@ -834,7 +834,7 @@ export class PDFGenerator {
   private async prepareImageForPDF(imageUrl: string): Promise<{ data: string; format: 'JPEG' | 'PNG' }> {
     let imgData = imageUrl;
     
-    if (imageUrl.startsWith('http')) {
+    if (imageUrl.startsWith('http') || imageUrl.startsWith('/')) {
       imgData = await this.loadImageAsDataURL(imageUrl);
     }
     
