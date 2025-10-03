@@ -9,8 +9,6 @@ export class PDFGenerator {
   private currentY: number = 20;
   private primaryColor = "#242553";
   private orangeColor = "#F07E1A";
-  private purpleColor = "#74388D";
-  private cyanColor = "#50BFD6";
   private textColor = "#333333";
   private lightGray = "#f5f5f5";
   private logoData: string | null = null;
@@ -170,11 +168,11 @@ export class PDFGenerator {
     const glossaryItems = [
       { label: "Destinos", value: reservation.destinos?.length || 0, color: this.primaryColor },
       { label: "Vuelos", value: reservation.vuelos?.length || 0, color: this.orangeColor },
-      { label: "Pasajeros", value: reservation.pasajeros?.length || 0, color: this.purpleColor },
+      { label: "Pasajeros", value: reservation.pasajeros?.length || 0, color: this.primaryColor },
       {
         label: "Tours",
         value: reservation.destinos?.reduce((acc, d) => acc + (d.tours?.length || 0), 0) || 0,
-        color: this.cyanColor,
+        color: this.orangeColor,
       },
     ];
 
@@ -384,7 +382,7 @@ export class PDFGenerator {
   private addToursSection(tours: any[]) {
     this.doc.setFontSize(10);
     this.doc.setFont("helvetica", "bold");
-    this.doc.setTextColor(this.purpleColor);
+    this.doc.setTextColor(this.primaryColor);
     this.doc.text("Tours y Excursiones", this.margin + 5, this.currentY);
 
     this.currentY += 6;
@@ -428,7 +426,7 @@ export class PDFGenerator {
   private addTransfersSection(transfers: any[]) {
     this.doc.setFontSize(10);
     this.doc.setFont("helvetica", "bold");
-    this.doc.setTextColor(this.cyanColor);
+    this.doc.setTextColor(this.orangeColor);
     this.doc.text("Traslados", this.margin + 5, this.currentY);
 
     this.currentY += 6;
@@ -467,7 +465,7 @@ export class PDFGenerator {
 
     this.addNewPage();
 
-    this.doc.setTextColor(this.purpleColor);
+    this.doc.setTextColor(this.primaryColor);
     this.doc.setFontSize(16);
     this.doc.setFont("helvetica", "bold");
     this.doc.text("Información de Vuelos", this.margin, this.currentY);
@@ -682,7 +680,7 @@ export class PDFGenerator {
       this.currentY += 8;
 
       this.doc.setTextColor(this.primaryColor);
-      this.doc.textWithLink(reservation.terminosCondicionesUrl, this.margin, this.currentY, {
+      this.doc.textWithLink("Términos y Condiciones", this.margin, this.currentY, {
         url: reservation.terminosCondicionesUrl,
       });
 
