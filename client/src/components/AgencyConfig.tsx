@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,10 @@ export function AgencyConfig() {
   const { toast } = useToast();
   const [formData, setFormData] = useState(config);
 
+  useEffect(() => {
+    setFormData(config);
+  }, [config]);
+
   const handleSave = () => {
     updateConfig(formData);
     toast({
@@ -23,7 +27,6 @@ export function AgencyConfig() {
   const handleReset = () => {
     if (confirm("¿Estás seguro de restablecer la configuración a los valores predeterminados?")) {
       resetConfig();
-      setFormData(config);
       toast({
         title: "Configuración restablecida",
         description: "Se han restaurado los valores predeterminados",

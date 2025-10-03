@@ -1,5 +1,5 @@
 import jsPDF from "jspdf";
-import type { Reservation } from "@shared/schema";
+import type { Reservation, AgencyConfig } from "@shared/schema";
 
 export class PDFGenerator {
   private doc: jsPDF;
@@ -13,8 +13,9 @@ export class PDFGenerator {
   private lightGray = "#f5f5f5";
   private logoData: string | null = null;
   private currentPageNumber: number = 1;
+  private agencyConfig: AgencyConfig;
 
-  constructor() {
+  constructor(agencyConfig: AgencyConfig) {
     this.doc = new jsPDF({
       orientation: "portrait",
       unit: "mm",
@@ -22,11 +23,13 @@ export class PDFGenerator {
     });
     this.pageHeight = this.doc.internal.pageSize.height;
     this.pageWidth = this.doc.internal.pageSize.width;
+    this.agencyConfig = agencyConfig;
   }
 
   async generate(reservation: Reservation): Promise<Blob> {
     try {
-      this.logoData = await this.loadImageAsDataURL("/attached_assets/logo_1759463703691.png");
+      const logoUrl = this.agencyConfig.logoUrl || "/attached_assets/logo_1759463703691.png";
+      this.logoData = await this.loadImageAsDataURL(logoUrl);
     } catch (error) {
       console.warn("Could not load logo, will use text fallback", error);
     }
@@ -120,13 +123,13 @@ export class PDFGenerator {
         this.doc.setTextColor(255, 255, 255);
         this.doc.setFontSize(14);
         this.doc.setFont("helvetica", "bold");
-        this.doc.text("AL Mundo Tours", this.margin, 10);
+        this.doc.text(this.agencyConfig.nombre, this.margin, 10);
       }
     } else {
       this.doc.setTextColor(255, 255, 255);
       this.doc.setFontSize(14);
       this.doc.setFont("helvetica", "bold");
-      this.doc.text("AL Mundo Tours", this.margin, 10);
+      this.doc.text(this.agencyConfig.nombre, this.margin, 10);
     }
     
     this.doc.setTextColor(255, 255, 255);
@@ -742,7 +745,7 @@ export class PDFGenerator {
     this.doc.setTextColor(this.textColor);
 
     const legalText =
-      "AL Mundo Tours se acoge a la ley 679 del 2001 para la protección de los niños, niñas y adolescentes contra la explotación, la pornografía y el turismo sexual. La persona que atente contra los niños del país será denunciada a las autoridades. Advertimos a todos nuestros clientes que la explotación y abuso sexual de menores de edad en el país son sancionados penal y administrativamente.";
+      `${this.agencyConfig.nombre} se acoge a la ley 679 del 2001 para la protección de los niños, niñas y adolescentes contra la explotación, la pornografía y el turismo sexual. La persona que atente contra los niños del país será denunciada a las autoridades. Advertimos a todos nuestros clientes que la explotación y abuso sexual de menores de edad en el país son sancionados penal y administrativamente.`;
 
     const legalLines = this.doc.splitTextToSize(legalText, this.pageWidth - 2 * this.margin);
     this.doc.text(legalLines, this.margin, this.currentY);
@@ -752,7 +755,7 @@ export class PDFGenerator {
     this.doc.setFontSize(12);
     this.doc.setFont("helvetica", "bold");
     this.doc.setTextColor(this.primaryColor);
-    const closingMessage = "Gracias por viajar con AL Mundo Tours, tu viaje comienza aquí";
+    const closingMessage = `Gracias por viajar con ${this.agencyConfig.nombre}, tu viaje comienza aquí`;
     this.doc.text(closingMessage, this.pageWidth / 2, this.currentY, { align: "center" });
 
     if (reservation.notasGenerales) {
@@ -828,21 +831,32 @@ export class PDFGenerator {
         this.doc.setFontSize(9);
         this.doc.setTextColor(100, 100, 100);
         this.doc.setFont("helvetica", "bold");
-        this.doc.text("AL Mundo Tours", this.margin, footerY + 3);
+        this.doc.text(this.agencyConfig.nombre, this.margin, footerY + 3);
       }
     } else {
       this.doc.setFontSize(9);
       this.doc.setTextColor(100, 100, 100);
       this.doc.setFont("helvetica", "bold");
-      this.doc.text("AL Mundo Tours", this.margin, footerY + 3);
+      this.doc.text(this.agencyConfig.nombre, this.margin, footerY + 3);
     }
 
     // Company info in center
     this.doc.setFontSize(9);
     this.doc.setTextColor(100, 100, 100);
     this.doc.setFont("helvetica", "normal");
-    this.doc.text("Calle 38 No 21-31, Tuluá – Colombia", this.pageWidth / 2, footerY + 2, { align: "center" });
-    this.doc.text("Tel: +57 (601) 745 89 00 | infos@almundotours.com", this.pageWidth / 2, footerY + 6, { align: "center" });
+    
+    const addressLine = [
+      this.agencyConfig.direccion,
+      this.agencyConfig.ciudad
+    ].filter(Boolean).join(", ") || "Dirección no configurada";
+    
+    const contactLine = [
+      this.agencyConfig.telefono ? `Tel: ${this.agencyConfig.telefono}` : null,
+      this.agencyConfig.email
+    ].filter(Boolean).join(" | ") || "Contacto no configurado";
+    
+    this.doc.text(addressLine, this.pageWidth / 2, footerY + 2, { align: "center" });
+    this.doc.text(contactLine, this.pageWidth / 2, footerY + 6, { align: "center" });
 
     // Page number on the right
     this.doc.setFontSize(9);
@@ -851,7 +865,7 @@ export class PDFGenerator {
   }
 }
 
-export async function generateReservationPDF(reservation: Reservation): Promise<Blob> {
-  const generator = new PDFGenerator();
+export async function generateReservationPDF(reservation: Reservation, agencyConfig: AgencyConfig): Promise<Blob> {
+  const generator = new PDFGenerator(agencyConfig);
   return await generator.generate(reservation);
 }

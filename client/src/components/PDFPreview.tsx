@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Download, Printer, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { generateReservationPDF } from "@/lib/pdfGenerator";
+import { useAgencyConfig } from "@/hooks/use-agency-config";
 import type { Reservation } from "@shared/schema";
 
 interface PDFPreviewProps {
@@ -12,18 +13,20 @@ interface PDFPreviewProps {
 
 export function PDFPreview({ reservation, onDownload, onBack }: PDFPreviewProps) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const { config } = useAgencyConfig();
 
   const handleDownload = async () => {
     try {
       setIsGenerating(true);
       console.log("Generando PDF con datos:", reservation);
-      const pdfBlob = await generateReservationPDF(reservation);
+      const pdfBlob = await generateReservationPDF(reservation, config);
       console.log("PDF generado exitosamente, tamaño:", pdfBlob.size);
       
       const url = URL.createObjectURL(pdfBlob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `Reserva_${reservation.codigoReserva}_AL_Mundo_Tours.pdf`;
+      const agencySlug = config.nombre.replace(/\s+/g, '_');
+      link.download = `Reserva_${reservation.codigoReserva}_${agencySlug}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -70,7 +73,7 @@ export function PDFPreview({ reservation, onDownload, onBack }: PDFPreviewProps)
         <div className="bg-white text-black p-8 shadow-lg" style={{ aspectRatio: '210/297' }}>
           {/* Header with Logo */}
           <div className="mb-6">
-            <div className="text-sm text-gray-600">AL Mundo Tours</div>
+            <div className="text-sm text-gray-600">{config.nombre}</div>
           </div>
 
           {/* Banner Placeholder */}
@@ -144,8 +147,8 @@ export function PDFPreview({ reservation, onDownload, onBack }: PDFPreviewProps)
 
           {/* Footer Simulation */}
           <div className="mt-8 pt-4 border-t border-gray-200 text-xs text-gray-500 text-center">
-            <p>AL Mundo Tours - Calle 38 No 21-31, Tuluá – Colombia</p>
-            <p>Tel: +57 (601) 745 89 00 | infos@almundotours.com</p>
+            <p>{config.nombre} - {config.direccion}{config.ciudad ? `, ${config.ciudad}` : ''}</p>
+            <p>{config.telefono && `Tel: ${config.telefono}`}{config.email && ` | ${config.email}`}</p>
           </div>
         </div>
       </div>
