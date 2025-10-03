@@ -7,6 +7,7 @@ import Home from "@/pages/Home";
 import NotFound from "@/pages/not-found";
 import { AgencyConfig } from "@/components/AgencyConfig";
 import ImageLibraryManager from "@/pages/ImageLibraryManager";
+import SavedReservations from "@/pages/SavedReservations";
 
 function Router() {
   return (
@@ -14,6 +15,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/config" component={AgencyConfig} />
       <Route path="/images" component={ImageLibraryManager} />
+      <Route path="/reservations" component={SavedReservations} />
       <Route component={NotFound} />
     </Switch>
   );

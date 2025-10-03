@@ -1,4 +1,4 @@
-import { FileText, Settings, ImageIcon } from "lucide-react";
+import { FileText, Settings, ImageIcon, FolderOpen } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useAgencyConfig } from "@/hooks/use-agency-config";
@@ -30,6 +30,11 @@ export function Header() {
                 <p className="text-xs text-muted-foreground" data-testid="text-agency-location">{config.ciudad}</p>
               )}
             </div>
+            <Link href="/reservations">
+              <Button variant="outline" size="icon" data-testid="button-reservations">
+                <FolderOpen className="w-4 h-4" />
+              </Button>
+            </Link>
             <Link href="/images">
               <Button variant="outline" size="icon" data-testid="button-images">
                 <ImageIcon className="w-4 h-4" />
