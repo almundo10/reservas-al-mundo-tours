@@ -12,6 +12,7 @@ export class PDFGenerator {
   private textColor = "#333333";
   private lightGray = "#f5f5f5";
   private logoData: string | null = null;
+  private logoFormat: 'JPEG' | 'PNG' | null = null;
   private currentPageNumber: number = 1;
   private agencyConfig: AgencyConfig;
 
@@ -29,8 +30,9 @@ export class PDFGenerator {
   async generate(reservation: Reservation): Promise<Blob> {
     try {
       const logoUrl = this.agencyConfig.logoUrl || "/attached_assets/logo_1759463703691.png";
-      const { data } = await this.prepareImageForPDF(logoUrl);
+      const { data, format } = await this.prepareImageForPDF(logoUrl);
       this.logoData = data;
+      this.logoFormat = format;
     } catch (error) {
       console.warn("Could not load logo, will use text fallback", error);
     }
@@ -114,12 +116,11 @@ export class PDFGenerator {
     this.doc.setFillColor(this.primaryColor);
     this.doc.rect(0, 0, this.pageWidth, 15, "F");
     
-    if (this.logoData) {
+    if (this.logoData && this.logoFormat) {
       const logoHeight = 10;
       const logoWidth = 40;
       try {
-        const format = this.getImageFormat(this.logoData);
-        this.doc.addImage(this.logoData, format, this.margin, 2.5, logoWidth, logoHeight);
+        this.doc.addImage(this.logoData, this.logoFormat, this.margin, 2.5, logoWidth, logoHeight);
       } catch (error) {
         console.warn("Could not add logo to header", error);
         this.doc.setTextColor(255, 255, 255);
@@ -882,10 +883,9 @@ export class PDFGenerator {
     this.doc.line(this.margin, footerY - 3, this.pageWidth - this.margin, footerY - 3);
 
     // Logo on the left
-    if (this.logoData) {
+    if (this.logoData && this.logoFormat) {
       try {
-        const format = this.getImageFormat(this.logoData);
-        this.doc.addImage(this.logoData, format, this.margin, footerY - 2, 25, 12);
+        this.doc.addImage(this.logoData, this.logoFormat, this.margin, footerY - 2, 25, 12);
       } catch (error) {
         console.warn("Could not add logo to footer", error);
         this.doc.setFontSize(9);
