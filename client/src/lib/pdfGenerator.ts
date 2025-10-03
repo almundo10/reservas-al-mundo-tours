@@ -29,11 +29,8 @@ export class PDFGenerator {
   async generate(reservation: Reservation): Promise<Blob> {
     try {
       const logoUrl = this.agencyConfig.logoUrl || "/attached_assets/logo_1759463703691.png";
-      if (logoUrl.startsWith('data:image/')) {
-        this.logoData = logoUrl;
-      } else {
-        this.logoData = await this.loadImageAsDataURL(logoUrl);
-      }
+      const { data } = await this.prepareImageForPDF(logoUrl);
+      this.logoData = data;
     } catch (error) {
       console.warn("Could not load logo, will use text fallback", error);
     }
@@ -62,12 +59,8 @@ export class PDFGenerator {
       try {
         const bannerUrl = reservation.destinos[0].imagenBanner;
         if (bannerUrl && (bannerUrl.startsWith('http') || bannerUrl.startsWith('data:image/'))) {
-          let imgData = bannerUrl;
-          if (bannerUrl.startsWith('http')) {
-            imgData = await this.loadImageAsDataURL(bannerUrl);
-          }
-          const format = this.getImageFormat(imgData);
-          this.doc.addImage(imgData, format, this.margin, this.currentY, bannerWidth, bannerHeight);
+          const { data, format } = await this.prepareImageForPDF(bannerUrl);
+          this.doc.addImage(data, format, this.margin, this.currentY, bannerWidth, bannerHeight);
           
           this.doc.setFillColor(0, 0, 0, 0.4);
           this.doc.rect(this.margin, this.currentY, bannerWidth, bannerHeight, "F");
@@ -409,12 +402,8 @@ export class PDFGenerator {
         try {
           const photoUrl = hotel.fotos[i];
           if (photoUrl && (photoUrl.startsWith('http') || photoUrl.startsWith('data:image/'))) {
-            let imgData = photoUrl;
-            if (photoUrl.startsWith('http')) {
-              imgData = await this.loadImageAsDataURL(photoUrl);
-            }
-            const format = this.getImageFormat(imgData);
-            this.doc.addImage(imgData, format, xPos, yPos, photoWidth, photoHeight);
+            const { data, format } = await this.prepareImageForPDF(photoUrl);
+            this.doc.addImage(data, format, xPos, yPos, photoWidth, photoHeight);
           } else {
             this.doc.setFillColor(220, 220, 220);
             this.doc.rect(xPos, yPos, photoWidth, photoHeight, "F");
@@ -540,12 +529,8 @@ export class PDFGenerator {
         try {
           const logoUrl = vuelo.logoAerolinea;
           if (logoUrl && (logoUrl.startsWith('http') || logoUrl.startsWith('data:image/'))) {
-            let imgData = logoUrl;
-            if (logoUrl.startsWith('http')) {
-              imgData = await this.loadImageAsDataURL(logoUrl);
-            }
-            const format = this.getImageFormat(imgData);
-            this.doc.addImage(imgData, format, this.pageWidth - this.margin - 25, this.currentY + 5, 20, 10);
+            const { data, format } = await this.prepareImageForPDF(logoUrl);
+            this.doc.addImage(data, format, this.pageWidth - this.margin - 25, this.currentY + 5, 20, 10);
           }
         } catch (error) {
           console.warn("Could not load airline logo", error);
@@ -796,9 +781,60 @@ export class PDFGenerator {
   }
 
   private getImageFormat(dataUrl: string): 'JPEG' | 'PNG' | 'WEBP' {
+    const base64Data = dataUrl.split(',')[1] || dataUrl;
+    
+    if (base64Data.startsWith('iVBOR')) return 'PNG';
+    if (base64Data.startsWith('UklGR')) return 'WEBP';
+    if (base64Data.startsWith('/9j/')) return 'JPEG';
+    
     if (dataUrl.includes('data:image/png')) return 'PNG';
     if (dataUrl.includes('data:image/webp')) return 'WEBP';
     return 'JPEG';
+  }
+
+  private async convertWebPToJPEG(dataUrl: string): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Could not get canvas context"));
+          return;
+        }
+        
+        ctx.drawImage(img, 0, 0);
+        const jpegDataUrl = canvas.toDataURL("image/jpeg", 0.9);
+        resolve(jpegDataUrl);
+      };
+      
+      img.onerror = () => {
+        reject(new Error("Failed to convert WEBP image"));
+      };
+      
+      img.src = dataUrl;
+    });
+  }
+
+  private async prepareImageForPDF(imageUrl: string): Promise<{ data: string; format: 'JPEG' | 'PNG' }> {
+    let imgData = imageUrl;
+    
+    if (imageUrl.startsWith('http')) {
+      imgData = await this.loadImageAsDataURL(imageUrl);
+    }
+    
+    const format = this.getImageFormat(imgData);
+    
+    if (format === 'WEBP') {
+      imgData = await this.convertWebPToJPEG(imgData);
+      return { data: imgData, format: 'JPEG' };
+    }
+    
+    return { data: imgData, format };
   }
 
   private async loadImageAsDataURL(url: string): Promise<string> {
