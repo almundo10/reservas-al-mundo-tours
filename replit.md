@@ -18,14 +18,18 @@ Preferred communication style: Simple, everyday language.
 
 **UI Component System**: Built with shadcn/ui components (Radix UI primitives) and styled with Tailwind CSS. The design follows a hybrid approach - dark mode utility interface for data entry, light professional styling for PDF output.
 
-**Form Management**: Multi-step wizard pattern with React Hook Form and Zod validation. The form is broken into logical sections (Basic Info, Passengers, Destinations, Flights, Final Details) to simplify complex reservation data entry.
+**Form Management**: Multi-step wizard pattern with React Hook Form and Zod validation. The form is broken into logical sections (Basic Info, Passengers, Destinations, Flights, Final Details) to simplify complex reservation data entry. Features include:
+- Custom destination input (checkbox toggles between predefined selector and free text)
+- Custom airline input (checkbox toggles between predefined selector and free text)
+- Hotel fields: check-in/out times, room count, nights, meal plans
+- Responsible party contact: name, document, phone number
 
 **State Management**: Component-level state with React hooks. Form data is managed locally until submission, then passed to the PDF generation system.
 
 **Routing**: Wouter for lightweight client-side routing. Simple two-page structure (Home and 404).
 
 **Design System**: 
-- Corporate brand colors: Primary blue (#242553), Orange (#F07E1A), Purple (#74388D), Cyan (#50BFD6)
+- Corporate brand colors: Primary blue (#242553) and Orange (#F07E1A) only (purple and cyan removed per user request)
 - Typography: Poppins font family from Google Fonts (interface and PDF)
 - Dark mode interface with utility-focused design
 - Professional light-themed PDF output with company logo in footer
@@ -55,9 +59,11 @@ Preferred communication style: Simple, everyday language.
 **PDF Generation**: jsPDF library for client-side PDF creation. Generates multi-page documents with images, tables, and custom styling to match AL Mundo Tours branding. Features include:
 - Company logo in footer (left) on all pages
 - Consecutive page numbering (right) on all pages  
-- Clickable links for terms and conditions
+- Clickable links for terms and conditions (displays "Términos y Condiciones" text)
 - Minimum 9pt font size for all content (improved readability)
-- Corporate color scheme throughout (#242553, #F07E1A, #74388D, #50BFD6)
+- Two-color scheme: Blue (#242553) and Orange (#F07E1A) only
+- Hotel details include check-in/out times and room count
+- Passenger contact includes responsible party phone number
 
 **Form Validation**: Zod schema validation integrated with React Hook Form resolvers. Comprehensive schemas defined for Passenger, Flight, Tour, Transfer, Hotel, and Destination entities.
 
