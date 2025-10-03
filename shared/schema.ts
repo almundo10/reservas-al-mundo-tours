@@ -143,12 +143,16 @@ export type Reservation = z.infer<typeof reservationSchema>;
 export const imageLibrarySchema = z.object({
   id: z.string(),
   nombre: z.string(),
-  url: z.string(),
+  url: z.string(), // base64 data URL or external URL
   categoria: z.enum(["destino", "aerolinea", "vehiculo", "hotel"]),
-  destino: z.string().optional(),
+  tags: z.array(z.string()).optional(), // for searching/filtering
+  fechaCreacion: z.string(),
 });
 
 export type ImageLibrary = z.infer<typeof imageLibrarySchema>;
+
+export const insertImageLibrarySchema = imageLibrarySchema.omit({ id: true, fechaCreacion: true });
+export type InsertImageLibrary = z.infer<typeof insertImageLibrarySchema>;
 
 // Agency configuration types
 export const agencyConfigSchema = z.object({

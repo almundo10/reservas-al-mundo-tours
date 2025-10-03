@@ -6,12 +6,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Home from "@/pages/Home";
 import NotFound from "@/pages/not-found";
 import { AgencyConfig } from "@/components/AgencyConfig";
+import ImageLibraryManager from "@/pages/ImageLibraryManager";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/config" component={AgencyConfig} />
+      <Route path="/images" component={ImageLibraryManager} />
       <Route component={NotFound} />
     </Switch>
   );
