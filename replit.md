@@ -6,6 +6,33 @@ This is a web application for AL Mundo Tours, a Colombian travel agency, designe
 
 The application features a multi-step form interface for data entry and generates polished, branded PDF documents suitable for client delivery. It supports complex travel itineraries with multiple destinations, flights, accommodations, and activities.
 
+## Recent Changes (October 2025)
+
+### Schema Updates
+- **Hotel fields added**: `telefono`, `direccion`, `numeroReserva`
+- **Tour fields added**: `operador` (tour operator name)
+- **Reservation fields added**: `fechaPlazoPago` (payment deadline date)
+- **Responsible person contact**: `telefonoResponsable`
+
+### Form Enhancements
+- Custom destination input with toggle between predefined list and manual entry
+- Custom airline input with toggle between predefined list and manual entry
+- Hotel section now includes: address, phone, reservation number fields
+- Tour section now includes: operator name field
+- Final details section now includes: payment deadline date field
+- Basic info section includes: responsible person phone number
+
+### PDF Improvements
+- Company logo displayed in header (replaces text "AL Mundo Tours")
+- Header background: corporate blue (#242553) with white text
+- Hotel details show: address, phone, reservation number
+- Tour details show: operator name
+- Contact section shows: responsible person phone number
+- Payment section shows: payment deadline date below balance
+- Consecutive page numbering on all pages
+- Minimum 9pt font size for improved readability
+- Two-color scheme: Blue (#242553) and Orange (#F07E1A) only
+
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.

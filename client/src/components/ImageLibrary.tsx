@@ -32,6 +32,11 @@ export function ImageLibrary({ open, onClose, onSelect, category = "destino" }: 
       { id: '8', name: 'Van Ejecutiva', url: '/images/van.jpg' },
       { id: '9', name: 'Bus Turístico', url: '/images/bus.jpg' },
     ],
+    hotel: [
+      { id: '10', name: 'Hotel Caribe - Exterior', url: '/images/hotel1.jpg' },
+      { id: '11', name: 'Hotel Caribe - Habitación', url: '/images/hotel2.jpg' },
+      { id: '12', name: 'Hotel Caribe - Piscina', url: '/images/hotel3.jpg' },
+    ],
   };
 
   const images = mockImages[category] || [];
@@ -61,15 +66,16 @@ export function ImageLibrary({ open, onClose, onSelect, category = "destino" }: 
           </div>
 
           <Tabs defaultValue={category} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="destino" data-testid="tab-destinos">Destinos</TabsTrigger>
               <TabsTrigger value="aerolinea" data-testid="tab-aerolineas">Aerolíneas</TabsTrigger>
               <TabsTrigger value="vehiculo" data-testid="tab-vehiculos">Vehículos</TabsTrigger>
+              <TabsTrigger value="hotel" data-testid="tab-hoteles">Hoteles</TabsTrigger>
             </TabsList>
 
             <TabsContent value={category} className="mt-4">
               <div className="grid grid-cols-3 gap-4 max-h-96 overflow-y-auto">
-                {images.map((img) => (
+                {images.map((img: any) => (
                   <button
                     key={img.id}
                     onClick={() => handleSelect(img.url)}
