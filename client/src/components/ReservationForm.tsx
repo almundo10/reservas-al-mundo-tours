@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -11,19 +11,30 @@ import type { Reservation, Passenger, Destination, Flight, Tour, Transfer } from
 
 interface ReservationFormProps {
   onSubmit: (data: Reservation) => void;
+  initialData?: Reservation | null;
+  savedReservationId?: string | null;
 }
 
-export function ReservationForm({ onSubmit }: ReservationFormProps) {
+export function ReservationForm({ onSubmit, initialData, savedReservationId }: ReservationFormProps) {
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState<Partial<Reservation>>({
-    cantidadAdultos: 1,
-    cantidadNinos: 0,
-    pasajeros: [],
-    destinos: [],
-    vuelos: [],
-    incluye: [],
-    noIncluye: [],
-  });
+  const [formData, setFormData] = useState<Partial<Reservation>>(
+    initialData || {
+      cantidadAdultos: 1,
+      cantidadNinos: 0,
+      pasajeros: [],
+      destinos: [],
+      vuelos: [],
+      incluye: [],
+      noIncluye: [],
+    }
+  );
+
+  useEffect(() => {
+    if (initialData) {
+      setFormData(initialData);
+      setStep(1);
+    }
+  }, [initialData]);
 
   const steps = [
     { num: 1, name: "Información Básica", icon: FileText },

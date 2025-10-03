@@ -1,8 +1,13 @@
 import { useState } from "react";
-import { Download, Printer, ArrowLeft } from "lucide-react";
+import { Download, Printer, ArrowLeft, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { generateReservationPDF } from "@/lib/pdfGenerator";
 import { useAgencyConfig } from "@/hooks/use-agency-config";
+import { useSavedReservations } from "@/hooks/use-saved-reservations";
+import { useToast } from "@/hooks/use-toast";
 import type { Reservation } from "@shared/schema";
 
 interface PDFPreviewProps {
@@ -13,7 +18,11 @@ interface PDFPreviewProps {
 
 export function PDFPreview({ reservation, onDownload, onBack }: PDFPreviewProps) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [nombreReserva, setNombreReserva] = useState("");
   const { config } = useAgencyConfig();
+  const { addReservation, updateReservation, getReservationById } = useSavedReservations();
+  const { toast } = useToast();
 
   const handleDownload = async () => {
     try {
@@ -44,6 +53,54 @@ export function PDFPreview({ reservation, onDownload, onBack }: PDFPreviewProps)
     }
   };
 
+  const handleSaveReservation = () => {
+    if (reservation.id) {
+      const existing = getReservationById(reservation.id);
+      if (existing) {
+        const result = updateReservation(reservation.id, {
+          nombreReserva: nombreReserva || undefined,
+          reserva: reservation,
+        });
+        
+        if (result.success) {
+          toast({
+            title: "Reserva actualizada",
+            description: "Los cambios se han guardado correctamente",
+          });
+          setSaveDialogOpen(false);
+          setNombreReserva("");
+        } else {
+          toast({
+            title: "Error al actualizar",
+            description: result.error || "No se pudo actualizar la reserva",
+            variant: "destructive",
+          });
+        }
+        return;
+      }
+    }
+
+    const result = addReservation({
+      nombreReserva: nombreReserva || undefined,
+      reserva: reservation,
+    });
+
+    if (result.success) {
+      toast({
+        title: "Reserva guardada",
+        description: "La reserva se ha guardado correctamente",
+      });
+      setSaveDialogOpen(false);
+      setNombreReserva("");
+    } else {
+      toast({
+        title: "Error al guardar",
+        description: result.error || "No se pudo guardar la reserva",
+        variant: "destructive",
+      });
+    }
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto">
       <div className="bg-card border rounded-lg p-6 mb-4">
@@ -58,6 +115,14 @@ export function PDFPreview({ reservation, onDownload, onBack }: PDFPreviewProps)
             <h2 className="text-2xl font-semibold">Vista Previa del Documento</h2>
           </div>
           <div className="flex gap-2">
+            <Button 
+              variant="outline"
+              onClick={() => setSaveDialogOpen(true)}
+              data-testid="button-guardar-reserva"
+            >
+              <Save className="w-4 h-4 mr-2" />
+              Guardar Reserva
+            </Button>
             <Button 
               onClick={handleDownload} 
               disabled={isGenerating}
@@ -152,6 +217,40 @@ export function PDFPreview({ reservation, onDownload, onBack }: PDFPreviewProps)
           </div>
         </div>
       </div>
+
+      <Dialog open={saveDialogOpen} onOpenChange={setSaveDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Guardar Reserva</DialogTitle>
+            <DialogDescription>
+              Dale un nombre a esta reserva para identificarla fácilmente
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="nombre-reserva">Nombre de la Reserva (opcional)</Label>
+              <Input
+                id="nombre-reserva"
+                data-testid="input-nombre-reserva"
+                value={nombreReserva}
+                onChange={(e) => setNombreReserva(e.target.value)}
+                placeholder={`Reserva ${reservation.codigoReserva} - ${reservation.nombreCliente}`}
+              />
+              <p className="text-sm text-muted-foreground mt-1">
+                Si no ingresas un nombre, se usará el código de reserva
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSaveDialogOpen(false)} data-testid="button-cancel-save">
+              Cancelar
+            </Button>
+            <Button onClick={handleSaveReservation} data-testid="button-confirm-save">
+              Guardar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
