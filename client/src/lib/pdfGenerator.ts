@@ -145,24 +145,21 @@ export class PDFGenerator {
     this.doc.setFillColor(this.primaryColor);
     this.doc.rect(0, 0, this.pageWidth, 15, "F");
     
-    const headerLogoData = this.logoDataBlanco || this.logoData;
-    const headerLogoFormat = this.logoFormatBlanco || this.logoFormat;
-    
-    if (headerLogoData && headerLogoFormat) {
+    if (this.logoDataBlanco && this.logoFormatBlanco) {
       const logoHeight = 10;
       const logoWidth = 40;
       try {
-        this.doc.addImage(headerLogoData, headerLogoFormat, this.margin, 2.5, logoWidth, logoHeight);
+        this.doc.addImage(this.logoDataBlanco, this.logoFormatBlanco, this.margin, 2.5, logoWidth, logoHeight);
       } catch (error) {
-        console.warn("Could not add logo to header", error);
+        console.warn("Could not add white logo to header", error);
         this.doc.setTextColor(255, 255, 255);
-        this.doc.setFontSize(14);
+        this.doc.setFontSize(12);
         this.doc.setFont("helvetica", "bold");
         this.doc.text(this.agencyConfig.nombre, this.margin, 10);
       }
     } else {
       this.doc.setTextColor(255, 255, 255);
-      this.doc.setFontSize(14);
+      this.doc.setFontSize(12);
       this.doc.setFont("helvetica", "bold");
       this.doc.text(this.agencyConfig.nombre, this.margin, 10);
     }
