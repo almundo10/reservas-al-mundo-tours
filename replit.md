@@ -8,10 +8,21 @@ The application features a multi-step form interface for data entry and generate
 
 ## Recent Changes (October 2025)
 
+### Image Upload & Library Selection System (Latest)
+- **ImageUploadSelector Component**: Visual upload interface with drag-and-drop support and library selection modal
+- **Upload Validation**: Max 5MB file size, accepts PNG/JPG/JPEG/WEBP formats with user-friendly error messages
+- **Library Integration**: Dropdown button opens ImageLibrary modal for selecting pre-saved images
+- **AgencyConfig Enhancement**: All three logo fields (color, white, isotipo) now use ImageUploadSelector
+- **Isotipo Schema**: Added `isotipoUrl` field to AgencyConfig with localStorage persistence
+- **PDF Isotipo Rendering**: Company isotipo displays in header (top-right) on all PDF pages
+- **Image Format Conversion**: Automatic PNG/WEBP to JPEG conversion prevents jsPDF decoder CRC errors
+- **Transparent Image Handling**: White background added before converting transparent images to JPEG
+- **Robust Error Handling**: PDF generator gracefully handles missing/undefined fields with appropriate fallbacks
+
 ### Agency Configuration System
-- **Schema**: Added `AgencyConfig` type with fields: nombre, direccion, ciudad, email, telefono, logoUrl
+- **Schema**: Added `AgencyConfig` type with fields: nombre, direccion, ciudad, email, telefono, logoUrl, logoUrlBlanco, isotipoUrl
 - **Storage**: Configuration persisted in localStorage with key "almundo_agency_config"
-- **UI**: New `/config` route with editable form for agency settings
+- **UI**: New `/config` route with editable form and visual upload controls for agency settings
 - **Header Integration**: Dynamic header displays agency name and city from configuration
 - **PDF Integration**: Agency information (name, address, contact) dynamically inserted in PDF header, footer, and legal text
 - **Default Values**: Pre-configured with AL Mundo Tours information, fully customizable per agency
