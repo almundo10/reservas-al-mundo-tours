@@ -56,6 +56,11 @@ export function ImageUploadSelector({
     }
   };
 
+  const handleLibrarySelect = (url: string) => {
+    onChange(url);
+    setShowLibrary(false);
+  };
+
   return (
     <div className="space-y-3">
       <Label data-testid={`${testId}-label`}>{label}</Label>
@@ -118,7 +123,7 @@ export function ImageUploadSelector({
       <ImageLibrary
         open={showLibrary}
         onClose={() => setShowLibrary(false)}
-        onSelect={onChange}
+        onSelect={handleLibrarySelect}
         category={category}
       />
     </div>
