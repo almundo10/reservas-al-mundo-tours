@@ -205,12 +205,15 @@ export class PDFGenerator {
 
     this.doc.setFont("helvetica", "normal");
     this.doc.setFontSize(9);
-    const travelInfo = `En base a ${reservation.cantidadAdultos} adulto(s)${
+    const travelInfo = `En base a ${reservation.cantidadAdultos || 1} adulto(s)${
       reservation.cantidadNinos > 0 ? `, ${reservation.cantidadNinos} niño(s)` : ""
     }`;
     this.doc.text(travelInfo, this.margin + 10, this.currentY + 14);
+    
+    const fechaInicio = reservation.fechaInicioViaje || (reservation.destinos && reservation.destinos[0]?.fechaInicio) || "Pendiente";
+    const fechaFin = reservation.fechaFinViaje || (reservation.destinos && reservation.destinos[0]?.fechaFin) || "Pendiente";
     this.doc.text(
-      `${reservation.fechaInicioViaje} - ${reservation.fechaFinViaje}`,
+      `${fechaInicio} - ${fechaFin}`,
       this.margin + 10,
       this.currentY + 20
     );
@@ -220,10 +223,14 @@ export class PDFGenerator {
     this.doc.text("Contacto", midPoint, this.currentY + 8);
 
     this.doc.setFont("helvetica", "normal");
-    this.doc.text(reservation.nombreCliente, midPoint, this.currentY + 14);
+    const nombreCliente = reservation.nombreCliente || "Cliente";
+    this.doc.text(nombreCliente, midPoint, this.currentY + 14);
     this.doc.setFontSize(9);
     this.doc.setTextColor(120, 120, 120);
-    this.doc.text(`Doc: ${reservation.documentoCliente}`, midPoint, this.currentY + 20);
+    const documentoCliente = reservation.documentoCliente || "";
+    if (documentoCliente) {
+      this.doc.text(`Doc: ${documentoCliente}`, midPoint, this.currentY + 20);
+    }
     
     if (reservation.telefonoResponsable) {
       this.doc.text(`Tel: ${reservation.telefonoResponsable}`, midPoint, this.currentY + 25);
@@ -880,7 +887,7 @@ export class PDFGenerator {
     return 'JPEG';
   }
 
-  private async convertWebPToJPEG(dataUrl: string): Promise<string> {
+  private async convertToJPEG(dataUrl: string): Promise<string> {
     return new Promise((resolve, reject) => {
       const img = new Image();
       
@@ -895,13 +902,15 @@ export class PDFGenerator {
           return;
         }
         
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
         ctx.drawImage(img, 0, 0);
         const jpegDataUrl = canvas.toDataURL("image/jpeg", 0.9);
         resolve(jpegDataUrl);
       };
       
       img.onerror = () => {
-        reject(new Error("Failed to convert WEBP image"));
+        reject(new Error("Failed to convert image to JPEG"));
       };
       
       img.src = dataUrl;
@@ -917,8 +926,8 @@ export class PDFGenerator {
     
     const format = this.getImageFormat(imgData);
     
-    if (format === 'WEBP') {
-      imgData = await this.convertWebPToJPEG(imgData);
+    if (format === 'WEBP' || format === 'PNG') {
+      imgData = await this.convertToJPEG(imgData);
       return { data: imgData, format: 'JPEG' };
     }
     
