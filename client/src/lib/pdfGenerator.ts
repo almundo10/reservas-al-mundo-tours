@@ -15,6 +15,8 @@ export class PDFGenerator {
   private logoFormat: 'JPEG' | 'PNG' | null = null;
   private logoDataBlanco: string | null = null;
   private logoFormatBlanco: 'JPEG' | 'PNG' | null = null;
+  private isotipoData: string | null = null;
+  private isotipoFormat: 'JPEG' | 'PNG' | null = null;
   private currentPageNumber: number = 1;
   private agencyConfig: AgencyConfig;
 
@@ -47,6 +49,16 @@ export class PDFGenerator {
       }
     } catch (error) {
       console.warn("Could not load white logo, will use color logo in header", error);
+    }
+
+    try {
+      if (this.agencyConfig.isotipoUrl) {
+        const { data, format } = await this.prepareImageForPDF(this.agencyConfig.isotipoUrl);
+        this.isotipoData = data;
+        this.isotipoFormat = format;
+      }
+    } catch (error) {
+      console.warn("Could not load isotipo, will continue without it", error);
     }
 
     await this.addCoverPage(reservation);
@@ -158,10 +170,27 @@ export class PDFGenerator {
       this.doc.text(this.agencyConfig.nombre, this.margin, 10);
     }
     
+    // Add isotipo in header (top right)
+    if (this.isotipoData && this.isotipoFormat) {
+      try {
+        const isotipoSize = 10;
+        this.doc.addImage(
+          this.isotipoData, 
+          this.isotipoFormat, 
+          this.pageWidth - this.margin - isotipoSize, 
+          2.5, 
+          isotipoSize, 
+          isotipoSize
+        );
+      } catch (error) {
+        console.warn("Could not add isotipo to header", error);
+      }
+    }
+    
     this.doc.setTextColor(255, 255, 255);
     this.doc.setFontSize(9);
     this.doc.setFont("helvetica", "normal");
-    this.doc.text("Tu viaje comienza aquí", this.pageWidth - this.margin, 10, { align: "right" });
+    this.doc.text("Tu viaje comienza aquí", this.pageWidth - this.margin - (this.isotipoData ? 12 : 0), 10, { align: "right" });
   }
 
   private addTravelInfo(reservation: Reservation) {

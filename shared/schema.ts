@@ -163,6 +163,7 @@ export const agencyConfigSchema = z.object({
   telefono: z.string().optional(),
   logoUrl: z.string().optional(),
   logoUrlBlanco: z.string().optional(),
+  isotipoUrl: z.string().optional(),
 });
 
 export type AgencyConfig = z.infer<typeof agencyConfigSchema>;

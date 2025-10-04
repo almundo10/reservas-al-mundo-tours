@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useAgencyConfig } from "@/hooks/use-agency-config";
 import { Building2, Save, RotateCcw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { ImageUploadSelector } from "@/components/ImageUploadSelector";
 
 export function AgencyConfig() {
   const { config, updateConfig, resetConfig } = useAgencyConfig();
@@ -106,31 +107,36 @@ export function AgencyConfig() {
             </div>
 
             <div className="md:col-span-2">
-              <Label htmlFor="logoUrl" data-testid="label-logo-agencia">Logo en Color (para cuerpo y footer)</Label>
-              <Input
-                id="logoUrl"
-                data-testid="input-logo-agencia"
-                value={formData.logoUrl || ""}
-                onChange={(e) => setFormData({ ...formData, logoUrl: e.target.value })}
-                placeholder="/attached_assets/logo.png"
+              <ImageUploadSelector
+                label="Logo en Color (para cuerpo y footer del PDF)"
+                value={formData.logoUrl}
+                onChange={(url) => setFormData({ ...formData, logoUrl: url })}
+                helpText="Logo en color que aparecerá en el cuerpo del documento y en el footer del PDF"
+                testId="logo-color"
+                category="aerolinea"
               />
-              <p className="text-sm text-muted-foreground mt-1">
-                Ruta del logo en color para el cuerpo del documento y footer
-              </p>
             </div>
 
             <div className="md:col-span-2">
-              <Label htmlFor="logoUrlBlanco" data-testid="label-logo-blanco-agencia">Logo Blanco (para header azul)</Label>
-              <Input
-                id="logoUrlBlanco"
-                data-testid="input-logo-blanco-agencia"
-                value={formData.logoUrlBlanco || ""}
-                onChange={(e) => setFormData({ ...formData, logoUrlBlanco: e.target.value })}
-                placeholder="/attached_assets/logo-blanco.png"
+              <ImageUploadSelector
+                label="Logo Blanco (para header azul del PDF)"
+                value={formData.logoUrlBlanco}
+                onChange={(url) => setFormData({ ...formData, logoUrlBlanco: url })}
+                helpText="Logo blanco que aparecerá en el header azul del PDF"
+                testId="logo-blanco"
+                category="aerolinea"
               />
-              <p className="text-sm text-muted-foreground mt-1">
-                Ruta del logo blanco para el header azul del documento
-              </p>
+            </div>
+
+            <div className="md:col-span-2">
+              <ImageUploadSelector
+                label="Isotipo de la Agencia (icono para todas las páginas del PDF)"
+                value={formData.isotipoUrl}
+                onChange={(url) => setFormData({ ...formData, isotipoUrl: url })}
+                helpText="Icono pequeño de la agencia que aparecerá en todas las páginas del PDF"
+                testId="isotipo"
+                category="aerolinea"
+              />
             </div>
           </div>
 

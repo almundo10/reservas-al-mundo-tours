@@ -10,6 +10,7 @@ const defaultConfig: AgencyConfig = {
   email: "contacto@almundotours.com",
   telefono: "+57 601 234 5678",
   logoUrl: "/attached_assets/logo_1759463703691.png",
+  isotipoUrl: "/attached_assets/Isotipo-Color_1759586997402.png",
 };
 
 export function useAgencyConfig() {
