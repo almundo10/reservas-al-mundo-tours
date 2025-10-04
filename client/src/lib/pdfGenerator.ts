@@ -138,9 +138,6 @@ export class PDFGenerator {
     this.currentY += 20;
     this.addPassengerList(reservation);
 
-    this.currentY += 15;
-    this.addBodyLogo();
-
     this.addFooter();
   }
 
@@ -323,40 +320,6 @@ export class PDFGenerator {
     });
   }
 
-  private addBodyLogo() {
-    if (!this.logoData || !this.logoFormat) {
-      return;
-    }
-
-    try {
-      const logoWidth = 50;
-      const logoHeight = 25;
-      const xPosition = this.pageWidth - this.margin - logoWidth;
-      
-      this.doc.addImage(
-        this.logoData,
-        this.logoFormat,
-        xPosition,
-        this.currentY,
-        logoWidth,
-        logoHeight
-      );
-      
-      this.doc.setFontSize(8);
-      this.doc.setTextColor(100, 100, 100);
-      this.doc.setFont("helvetica", "normal");
-      this.doc.text(
-        this.agencyConfig.nombre.toUpperCase(),
-        xPosition + logoWidth / 2,
-        this.currentY + logoHeight + 4,
-        { align: "center" }
-      );
-      
-      this.currentY += logoHeight + 8;
-    } catch (error) {
-      console.warn("Could not add body logo", error);
-    }
-  }
 
   private async addItinerary(reservation: Reservation) {
     if (!reservation.destinos || reservation.destinos.length === 0) {
@@ -977,24 +940,6 @@ export class PDFGenerator {
     this.doc.setDrawColor(this.orangeColor);
     this.doc.setLineWidth(0.5);
     this.doc.line(this.margin, footerY - 3, this.pageWidth - this.margin, footerY - 3);
-
-    // Logo on the left
-    if (this.logoData && this.logoFormat) {
-      try {
-        this.doc.addImage(this.logoData, this.logoFormat, this.margin, footerY - 2, 25, 12);
-      } catch (error) {
-        console.warn("Could not add logo to footer", error);
-        this.doc.setFontSize(9);
-        this.doc.setTextColor(100, 100, 100);
-        this.doc.setFont("helvetica", "bold");
-        this.doc.text(this.agencyConfig.nombre, this.margin, footerY + 3);
-      }
-    } else {
-      this.doc.setFontSize(9);
-      this.doc.setTextColor(100, 100, 100);
-      this.doc.setFont("helvetica", "bold");
-      this.doc.text(this.agencyConfig.nombre, this.margin, footerY + 3);
-    }
 
     // Company info in center
     this.doc.setFontSize(9);
