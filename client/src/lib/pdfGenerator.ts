@@ -19,6 +19,7 @@ export class PDFGenerator {
   private isotipoFormat: 'JPEG' | 'PNG' | null = null;
   private currentPageNumber: number = 1;
   private agencyConfig: AgencyConfig;
+  private readonly footerHeight: number = 25;
 
   constructor(agencyConfig: AgencyConfig) {
     this.doc = new jsPDF({
@@ -29,6 +30,12 @@ export class PDFGenerator {
     this.pageHeight = this.doc.internal.pageSize.height;
     this.pageWidth = this.doc.internal.pageSize.width;
     this.agencyConfig = agencyConfig;
+  }
+
+  private ensureSpace(heightNeeded: number): void {
+    if (this.currentY + heightNeeded > this.pageHeight - this.footerHeight) {
+      this.addNewPage();
+    }
   }
 
   async generate(reservation: Reservation): Promise<Blob> {
@@ -289,9 +296,7 @@ export class PDFGenerator {
     this.currentY += 8;
 
     reservation.pasajeros.forEach((pasajero, idx) => {
-      if (this.currentY > this.pageHeight - 40) {
-        this.addNewPage();
-      }
+      this.ensureSpace(12);
 
       if (idx % 2 === 0) {
         this.doc.setFillColor(245, 245, 245);
@@ -333,9 +338,7 @@ export class PDFGenerator {
     this.currentY += 10;
 
     for (const destino of reservation.destinos) {
-      if (this.currentY > this.pageHeight - 80) {
-        this.addNewPage();
-      }
+      this.ensureSpace(15);
 
       this.doc.setFillColor(this.primaryColor);
       this.doc.rect(this.margin, this.currentY, this.pageWidth - 2 * this.margin, 10, "F");
@@ -361,8 +364,11 @@ export class PDFGenerator {
       );
 
       if (destino.descripcion) {
-        this.currentY += 6;
         const lines = this.doc.splitTextToSize(destino.descripcion, this.pageWidth - 2 * this.margin - 10);
+        const descriptionHeight = 6 + (lines.length * 5);
+        this.ensureSpace(descriptionHeight);
+        
+        this.currentY += 6;
         this.doc.text(lines, this.margin + 5, this.currentY, { align: 'justify', maxWidth: this.pageWidth - 2 * this.margin - 10 });
         this.currentY += lines.length * 5;
       }
@@ -386,6 +392,8 @@ export class PDFGenerator {
   }
 
   private async addHotelSection(hotel: any) {
+    this.ensureSpace(25);
+    
     this.doc.setFillColor(240, 245, 255);
     this.doc.rect(this.margin + 5, this.currentY, this.pageWidth - 2 * this.margin - 10, 8, "F");
 
@@ -438,21 +446,22 @@ export class PDFGenerator {
     }
 
     if (hotel.fotos && hotel.fotos.length > 0) {
-      this.currentY += 3;
       const photoWidth = 30;
       const photoHeight = 20;
       const photosPerRow = 3;
       const gap = 3;
+      const rows = Math.ceil(Math.min(hotel.fotos.length, 6) / photosPerRow);
+      const photosBlockHeight = 3 + (rows * (photoHeight + gap)) + 5;
+      
+      this.ensureSpace(photosBlockHeight);
+      
+      this.currentY += 3;
 
       for (let i = 0; i < Math.min(hotel.fotos.length, 6); i++) {
         const col = i % photosPerRow;
         const row = Math.floor(i / photosPerRow);
         const xPos = this.margin + 10 + col * (photoWidth + gap);
         const yPos = this.currentY + row * (photoHeight + gap);
-
-        if (this.currentY + (row + 1) * (photoHeight + gap) > this.pageHeight - 40) {
-          break;
-        }
 
         try {
           const photoUrl = hotel.fotos[i];
@@ -470,7 +479,6 @@ export class PDFGenerator {
         }
       }
 
-      const rows = Math.ceil(Math.min(hotel.fotos.length, 6) / photosPerRow);
       this.currentY += rows * (photoHeight + gap) + 3;
     }
 
@@ -478,6 +486,8 @@ export class PDFGenerator {
   }
 
   private addToursSection(tours: any[], fechaTour?: string) {
+    this.ensureSpace(10);
+    
     this.doc.setFontSize(10);
     this.doc.setFont("helvetica", "bold");
     this.doc.setTextColor(this.primaryColor);
@@ -486,9 +496,26 @@ export class PDFGenerator {
     this.currentY += 6;
 
     tours.forEach((tour, idx) => {
-      if (this.currentY > this.pageHeight - 40) {
-        this.addNewPage();
+      let tourBlockHeight = 5;
+      
+      if (fechaTour) {
+        tourBlockHeight += 4;
       }
+      
+      if (tour.descripcion) {
+        this.doc.setFont("helvetica", "normal");
+        this.doc.setFontSize(9);
+        const lines = this.doc.splitTextToSize(tour.descripcion, this.pageWidth - 2 * this.margin - 20);
+        tourBlockHeight += lines.length * 4;
+      }
+      
+      if (tour.operador || tour.duracion || tour.horaInicio) {
+        tourBlockHeight += 4;
+      }
+      
+      tourBlockHeight += 3;
+      
+      this.ensureSpace(tourBlockHeight);
 
       this.doc.setFontSize(9);
       this.doc.setFont("helvetica", "bold");
@@ -539,9 +566,7 @@ export class PDFGenerator {
     this.currentY += 6;
 
     transfers.forEach((transfer) => {
-      if (this.currentY > this.pageHeight - 40) {
-        this.addNewPage();
-      }
+      this.ensureSpace(15);
 
       this.doc.setFontSize(9);
       this.doc.setFont("helvetica", "normal");
@@ -580,12 +605,10 @@ export class PDFGenerator {
     this.currentY += 10;
 
     for (const vuelo of reservation.vuelos) {
-      if (this.currentY > this.pageHeight - 70) {
-        this.addNewPage();
-      }
+      const boxHeight = vuelo.logoAerolinea ? 55 : 45;
+      this.ensureSpace(boxHeight + 5);
 
       this.doc.setFillColor(this.lightGray);
-      const boxHeight = vuelo.logoAerolinea ? 55 : 45;
       this.doc.rect(this.margin, this.currentY, this.pageWidth - 2 * this.margin, boxHeight, "F");
 
       if (vuelo.logoAerolinea) {
@@ -824,6 +847,16 @@ export class PDFGenerator {
     this.doc.text(closingMessage, this.pageWidth / 2, this.currentY, { align: "center" });
 
     if (reservation.notasGenerales) {
+      this.doc.setFont("helvetica", "normal");
+      this.doc.setFontSize(9);
+      const notasLines = this.doc.splitTextToSize(
+        reservation.notasGenerales,
+        this.pageWidth - 2 * this.margin
+      );
+      
+      const notasBlockHeight = 15 + 10 + (notasLines.length * 4);
+      this.ensureSpace(notasBlockHeight);
+      
       this.currentY += 15;
 
       this.doc.setFontSize(10);
@@ -835,10 +868,6 @@ export class PDFGenerator {
 
       this.doc.setFont("helvetica", "normal");
       this.doc.setFontSize(9);
-      const notasLines = this.doc.splitTextToSize(
-        reservation.notasGenerales,
-        this.pageWidth - 2 * this.margin
-      );
       this.doc.text(notasLines, this.margin, this.currentY, { align: 'left', maxWidth: this.pageWidth - 2 * this.margin });
     }
   }
