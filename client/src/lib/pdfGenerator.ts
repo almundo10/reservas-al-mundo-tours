@@ -374,7 +374,7 @@ export class PDFGenerator {
       }
 
       if (destino.tours && destino.tours.length > 0) {
-        this.addToursSection(destino.tours);
+        this.addToursSection(destino.tours, destino.fechaInicio);
       }
 
       if (destino.traslados && destino.traslados.length > 0) {
@@ -477,7 +477,7 @@ export class PDFGenerator {
     this.currentY += 5;
   }
 
-  private addToursSection(tours: any[]) {
+  private addToursSection(tours: any[], fechaTour?: string) {
     this.doc.setFontSize(10);
     this.doc.setFont("helvetica", "bold");
     this.doc.setTextColor(this.primaryColor);
@@ -497,11 +497,19 @@ export class PDFGenerator {
 
       this.currentY += 5;
 
+      if (fechaTour) {
+        this.doc.setFontSize(9);
+        this.doc.setFont("helvetica", "normal");
+        this.doc.setTextColor(120, 120, 120);
+        this.doc.text(`Fecha: ${fechaTour}`, this.margin + 12, this.currentY);
+        this.currentY += 4;
+      }
+
       if (tour.descripcion) {
         this.doc.setFont("helvetica", "normal");
         this.doc.setFontSize(9);
         const lines = this.doc.splitTextToSize(tour.descripcion, this.pageWidth - 2 * this.margin - 20);
-        this.doc.text(lines, this.margin + 12, this.currentY, { align: 'justify', maxWidth: this.pageWidth - 2 * this.margin - 20 });
+        this.doc.text(lines, this.margin + 12, this.currentY, { align: 'left', maxWidth: this.pageWidth - 2 * this.margin - 20 });
         this.currentY += lines.length * 4;
       }
 
@@ -831,7 +839,7 @@ export class PDFGenerator {
         reservation.notasGenerales,
         this.pageWidth - 2 * this.margin
       );
-      this.doc.text(notasLines, this.margin, this.currentY, { align: 'justify', maxWidth: this.pageWidth - 2 * this.margin });
+      this.doc.text(notasLines, this.margin, this.currentY, { align: 'left', maxWidth: this.pageWidth - 2 * this.margin });
     }
   }
 
